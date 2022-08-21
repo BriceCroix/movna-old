@@ -1,0 +1,20 @@
+{
+    "appName": "Movnå",
+    "@appName": {
+        "description": "The name of the application"
+    },
+    "about": "About",
+    "itinerary": "Itinerary",
+    "itineraries": "Itineraries",
+    "home": "Home",
+    "activity": "Activity",
+    "activities": "Activities",
+    "noActivityYet": "No activity yet",
+    "profile": "Profile",
+    "speed": "Speed",
+    "averageSpeed": "Average speed",
+    "distance": "Distance",
+    "more": "More",
+    "statistics": "Statistics",
+    "history": "History"
+}
