@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import 'pages/home_page.dart';
-
+import 'package:movna/features/home/presentation/home_page.dart';
 
 class MovnaApp extends StatelessWidget {
   const MovnaApp({super.key});
@@ -13,6 +11,7 @@ class MovnaApp extends StatelessWidget {
       title: 'Movna',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      //theme: TODO,
       home: MovnaPage()
     );
   }

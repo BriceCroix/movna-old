@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:movna/pages/ongoing_activity_page.dart';
+import 'package:movna/features/ongoing_activity/presentation/ongoing_activity_page.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});

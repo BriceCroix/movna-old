@@ -30,8 +30,11 @@ class HistoryTitledBox extends StatelessWidget {
           ],
         ),
       ),
-      const Divider(indent: 30, endIndent: 30,),
-      Expanded(child:child),
+      const Divider(
+        indent: 30,
+        endIndent: 30,
+      ),
+      Expanded(child: child),
     ]);
   }
 }

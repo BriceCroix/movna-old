@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:movna/data/activity_manager.dart';
-import 'package:movna/model/activity_base.dart';
-import 'package:movna/pages/home/history_titled_box.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movna/core/injection.dart';
+import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/domain/repositories/activities_repository.dart';
+import 'package:movna/features/home/presentation/widgets/activity_card.dart';
+import 'package:movna/features/home/presentation/widgets/history_titled_box.dart';
 
 class HistoryTab extends StatefulWidget {
   const HistoryTab({Key? key}) : super(key: key);
@@ -25,8 +27,8 @@ class _HistoryTabState extends State<HistoryTab> {
               //TODO : Navigator push pastActivitiesPage
             },
             child: FutureBuilder(
-              future: getLastNActivities(10),
-              builder: (context, AsyncSnapshot<List<ActivityBase>> snapshot) {
+              future: injector<ActivitiesRepository>().getActivities(),
+              builder: (context, AsyncSnapshot<List<Activity>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: SpinKitRotatingCircle(
@@ -43,19 +45,10 @@ class _HistoryTabState extends State<HistoryTab> {
                       ),
                     );
                   } else {
-                    List<ActivityBase> activities = snapshot.data!;
+                    List<Activity> activities = snapshot.data!;
                     return ListView(
                       children: activities
-                          .map((activity) => Card(
-                                child: ListTile(
-                                  //TODO : relevant icon
-                                  leading: const Icon(
-                                      Icons.sports_gymnastics_rounded),
-                                  title: Text(activity.startTime.toString()),
-                                  subtitle: Text(activity.stopTime.toString()),
-                                  dense: true,
-                                ),
-                              ))
+                          .map((activity) => ActivityCard(activity: activity))
                           .toList(),
                     );
                   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'app.dart';
+import 'core/injection.dart';
 
-void main() {
-  runApp(MovnaApp());
+Future<void> main() async{
+  configureDependencies();
+  runApp(const MovnaApp());
 }

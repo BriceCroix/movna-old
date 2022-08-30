@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/pages/home/history_tab.dart';
-import 'package:movna/pages/home/home_tab.dart';
+import 'package:movna/features/home/presentation/widgets/history_tab.dart';
+import 'package:movna/features/home/presentation/widgets/home_tab.dart';
 
 class MovnaPage extends StatefulWidget {
   const MovnaPage({super.key});

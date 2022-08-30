@@ -48,3 +48,5 @@ app.*.map.json
 
 # Generated dart files (Isar, freezed...)
 *.g.dart
+*.freezed.dart
+injection.config.dart

@@ -1,40 +1,34 @@
+/// A sport type.
 enum Sport{
   other,
 
-  //walkAny,
   walk,
   walkNordic,
   hiking,
 
-  //bikingAny,
+  running,
+  runningTrail,
+
   biking,
   bikingMountain,
   bikingRoad,
   bikingElectric,
 
-  //runningAny,
-  running,
-  runningTrail,
-
-  //skiingAny,
   skiingCrossCountry,
   skiingOffPiste,
   snowboard,
   crossSkating,
   iceSkating,
 
-  //skiingAny,
   swimming,
   scubaDiving,
 
-  //waterGlidingAny,
   kayak,
   paddle,
   surf,
   windsurfing,
+  kitesurfing,
 
-
-  //urbanAny,
   scooter,
   skateboarding,
   rollerblading,
