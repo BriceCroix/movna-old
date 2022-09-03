@@ -15,7 +15,7 @@ class Activity with _$Activity {
     /// A null value indicates that this activity is not fully loaded.
     /// If the activity is mapped but no trackpoints are available then it is
     /// non null but empty.
-    List<TrackPoint>? trackPoints,
+    @Default([]) List<TrackPoint> trackPoints,
 
     /// Optional name of this activity.
     String? name,

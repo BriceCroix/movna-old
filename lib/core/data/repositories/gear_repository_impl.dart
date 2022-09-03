@@ -12,41 +12,13 @@ class GearRepositoryImpl implements GearRepository {
 
   GearRepositoryImpl({required this.dataBaseSource});
 
-  static Gear convertGearModelToEntity(GearModel model) {
-    return Gear(
-        creationTime: model.creationTime,
-        gearType: model.gearType,
-        name: model.name,
-        distanceInMeters: model.distanceInMeters,
-        useTime: Duration(microseconds: model.useTimeInMicroSeconds));
-  }
-
-  static GearModel convertGearEntityToModel(Gear gear) {
-    return GearModel(
-        creationTime: gear.creationTime,
-        localTimeOffsetInMicroSeconds:
-        gear.creationTime.timeZoneOffset.inMicroseconds,
-        gearType: gear.gearType,
-        name: gear.name,
-        distanceInMeters: gear.distanceInMeters,
-        useTimeInMicroSeconds: gear.useTime.inMicroseconds);
-  }
-
   @override
-  Future<List<Gear>> getAllGear() async {
+  Future<List<Gear>> getGear([int? maxCount]) async {
     try {
-      List<GearModel> models =
-      await dataBaseSource.getAllGear();
+      List<GearModel> models = await dataBaseSource.getGear(maxCount);
 
-      List<Gear> gear = [];
-
-      for (GearModel model in models) {
-        gear.add(convertGearModelToEntity(model));
-      }
-
-      return gear;
+      return models.map((e) => e.toGear()).toList();
     } catch (e) {
-      // TODO : handle error
       Logger logger = Logger();
       logger.e(e);
       return [];
@@ -56,23 +28,15 @@ class GearRepositoryImpl implements GearRepository {
   @override
   Future<ErrorState> saveGear(Gear gear) async {
     try {
-      GearModel model = convertGearEntityToModel(gear);
+      GearModel model = GearModel.fromGear(gear);
 
       await dataBaseSource.saveGearToDatabase(model);
 
       return true;
     } catch (e) {
-      // TODO handle errors
       Logger logger = Logger();
       logger.e(e);
       return false;
     }
-  }
-
-  @override
-  Future<Gear> getGear(
-      {required DateTime creationTime}) {
-    // TODO: implement getGear
-    throw UnimplementedError();
   }
 }

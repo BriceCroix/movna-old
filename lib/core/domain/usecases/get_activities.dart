@@ -7,7 +7,7 @@ class GetActivities{
   final ActivitiesRepository repository;
   GetActivities({required this.repository});
 
-  Future<List<Activity>> call({bool mapped = false}) {
-    return repository.getActivities(mapped: mapped);
+  Future<List<Activity>> call([int? maxCount]) {
+    return repository.getActivities(maxCount);
   }
 }

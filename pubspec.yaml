@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 0.0.1
 
 environment:
   sdk: ">=2.17.6 <3.0.0"
@@ -47,11 +47,9 @@ dependencies:
   equatable: ^2.0.3
   #training_center_xml:
   #  git: https://github.com/BriceCroix/training_center_xml
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   freezed_annotation: ^2.1.0
+  json_annotation: ^4.6.0
 
 dev_dependencies:
   flutter_test:
@@ -60,12 +58,9 @@ dev_dependencies:
   isar_generator: ^2.5.0
   injectable_generator: ^1.5.3
   freezed: ^2.1.0+1
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  # See `analysis_options.yaml` for more info about lints
   flutter_lints: ^2.0.0
+  json_serializable: ^6.3.1
 
 dependency_overrides:
   # Fix dependency conflict between freezed and isar

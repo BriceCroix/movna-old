@@ -19,11 +19,16 @@ class DataBaseSource {
   }
 
   /// Returns activity models sorted by start time.
-  Future<List<ActivityModel>> getActivities() async {
+  Future<List<ActivityModel>> getActivities([int? maxCount]) async {
     final isar = await _openIsar();
 
-    Future<List<ActivityModel>> res =
-        isar.activityModels.where().sortByStartTimeDesc().findAll();
+    Future<List<ActivityModel>> res = maxCount != null
+        ? isar.activityModels
+            .where()
+            .sortByStartTimeDesc()
+            .limit(maxCount)
+            .findAll()
+        : isar.activityModels.where().sortByStartTimeDesc().findAll();
 
     isar.close();
 
@@ -38,12 +43,17 @@ class DataBaseSource {
     isar.close();
   }
 
-  /// Returns activity models sorted by name.
-  Future<List<GearModel>> getAllGear() async {
+  /// Returns gear models sorted by name.
+  Future<List<GearModel>> getGear([int? maxCount]) async {
     final isar = await _openIsar();
 
-    Future<List<GearModel>> res =
-    isar.gearModels.where().sortByName().findAll();
+    Future<List<GearModel>> res = maxCount != null
+        ? isar.gearModels
+        .where()
+        .sortByName()
+        .limit(maxCount)
+        .findAll()
+        : isar.gearModels.where().sortByName().findAll();
 
     isar.close();
 
@@ -59,11 +69,16 @@ class DataBaseSource {
   }
 
   /// Returns itinerary models sorted by name.
-  Future<List<ItineraryModel>> getItineraries() async {
+  Future<List<ItineraryModel>> getItineraries([int? maxCount]) async {
     final isar = await _openIsar();
 
-    Future<List<ItineraryModel>> res =
-    isar.itineraryModels.where().sortByName().findAll();
+    Future<List<ItineraryModel>> res = maxCount != null
+        ? isar.itineraryModels
+        .where()
+        .sortByName()
+        .limit(maxCount)
+        .findAll()
+        : isar.itineraryModels.where().sortByName().findAll();
 
     isar.close();
 
