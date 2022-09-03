@@ -32,11 +32,11 @@ class GearRepositoryImpl implements GearRepository {
 
       await dataBaseSource.saveGearToDatabase(model);
 
-      return true;
+      return false;
     } catch (e) {
       Logger logger = Logger();
       logger.e(e);
-      return false;
+      return true;
     }
   }
 }

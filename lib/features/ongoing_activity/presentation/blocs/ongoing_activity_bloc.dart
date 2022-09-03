@@ -107,7 +107,7 @@ class OngoingActivityBloc
     if (!state.isPaused) {
       emit(state.copyWith(
         activity: state.activity.copyWith(
-          trackPoints: [...state.activity.trackPoints!, newTrackpoint],
+          trackPoints: [...state.activity.trackPoints, newTrackpoint],
           stopTime: newTrackpoint.dateTime!,
         ),
       ));

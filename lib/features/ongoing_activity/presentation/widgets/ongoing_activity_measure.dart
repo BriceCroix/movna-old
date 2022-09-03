@@ -19,7 +19,7 @@ class OngoingActivityMeasure extends StatelessWidget {
               value.toStringAsFixed(1),
               style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            Text(" $unit")
+            Text(' $unit')
           ],
         ),
         Text(

@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:movna/core/domain/entities/position.dart';
 
 part 'position_model.freezed.dart';
-
 part 'position_model.g.dart';
 
 @freezed

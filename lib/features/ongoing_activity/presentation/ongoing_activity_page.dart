@@ -114,7 +114,7 @@ class OngoingActivityView extends StatelessWidget {
                               .toString()
                               .split('.')
                               .first
-                              .padLeft(8, "0"),
+                              .padLeft(8, '0'),
                           style: const TextStyle(
                             fontSize: 70,
                             fontWeight: FontWeight.bold,
@@ -162,7 +162,7 @@ class OngoingActivityView extends StatelessWidget {
                   // TODO : hide all buttons but lock with Flow
                   /// Settings button
                   FloatingActionButton(
-                    heroTag: "settings",
+                    heroTag: 'settings',
                     backgroundColor:
                         state.isLocked ? Colors.grey : Colors.grey[400],
                     onPressed: state.isLocked ? null : () {},
@@ -172,7 +172,7 @@ class OngoingActivityView extends StatelessWidget {
 
                   /// Pause or stop button depending on whether is paused or not
                   FloatingActionButton(
-                    heroTag: "pause_stop",
+                    heroTag: 'pause_stop',
                     backgroundColor: state.isLocked
                         ? Colors.grey
                         : (state.isPaused ? Colors.red : Colors.amber),
@@ -194,7 +194,7 @@ class OngoingActivityView extends StatelessWidget {
 
                   /// Lock, Unlock or resume button depending on whether is paused or not
                   FloatingActionButton(
-                    heroTag: "lock_resume",
+                    heroTag: 'lock_resume',
                     backgroundColor:
                         state.isPaused ? Colors.lightGreen : Colors.blue,
                     onPressed: () => context.read<OngoingActivityBloc>().add(

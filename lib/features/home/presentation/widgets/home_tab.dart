@@ -64,7 +64,7 @@ class _HomeTabState extends State<HomeTab> {
             MaterialPageRoute(builder: (context) => const OngoingActivityPage()),
           );
         },
-        heroTag: "to_on_going_activity",
+        heroTag: 'to_on_going_activity',
         child: const Icon(Icons.play_arrow_rounded),
       ),
     );
