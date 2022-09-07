@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/features/home/presentation/widgets/history_tab.dart';
-import 'package:movna/features/home/presentation/widgets/home_tab.dart';
+import 'package:movna/features/home/presentation/tabs/history_tab.dart';
+import 'package:movna/features/home/presentation/tabs/start_tab.dart';
 
-class MovnaPage extends StatefulWidget {
-  const MovnaPage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MovnaPage> createState() => _MovnaPageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MovnaPageState extends State<MovnaPage>{
+class _HomePageState extends State<HomePage>{
 
   int _selectedIndex = 1;
 
   static const List<Widget> _pages = <Widget>[
     Text('1'),
-    HomeTab(),
+    StartTab(),
     HistoryTab(),
   ];
 

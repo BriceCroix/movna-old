@@ -13,5 +13,8 @@
     "distance": "Distance",
     "more": "Plus",
     "statistics": "Statistiques",
-    "history": "Historique"
+    "history": "Historique",
+    "automaticPause": "Pause automatique",
+    "automaticLock": "Verrouillage automatique",
+    "start": "Commencer"
 }

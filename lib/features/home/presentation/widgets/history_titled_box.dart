@@ -24,7 +24,7 @@ class HistoryTitledBox extends StatelessWidget {
             ),
             ElevatedButton.icon(
               onPressed: onMorePressed,
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add_rounded),
               label: Text(AppLocalizations.of(context)!.more),
             )
           ],

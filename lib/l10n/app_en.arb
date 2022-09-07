@@ -16,5 +16,8 @@
     "distance": "Distance",
     "more": "More",
     "statistics": "Statistics",
-    "history": "History"
+    "history": "History",
+    "automaticPause": "Automatic pause",
+    "automaticLock": "Automatic lock",
+    "start": "Start"
 }

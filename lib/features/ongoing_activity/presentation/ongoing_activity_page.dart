@@ -5,7 +5,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/domain/entities/position.dart';
-import 'package:movna/core/domain/usecases/save_activity.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 
@@ -17,7 +16,7 @@ class OngoingActivityPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => OngoingActivityBloc(injector<SaveActivity>()),
+      create: (_) => injector<OngoingActivityBloc>(),
       child: const OngoingActivityView(),
     );
   }

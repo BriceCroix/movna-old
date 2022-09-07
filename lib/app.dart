@@ -12,7 +12,7 @@ class MovnaApp extends StatelessWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       //theme: TODO,
-      home: MovnaPage()
+      home: HomePage()
     );
   }
 }
