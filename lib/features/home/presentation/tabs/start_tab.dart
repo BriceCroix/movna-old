@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
 import 'package:movna/features/ongoing_activity/presentation/ongoing_activity_page.dart';
 
@@ -78,38 +80,45 @@ class StartTabView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<StartTabBloc, StartTabState>(
+      buildWhen: (previous, current) =>
+          (previous is! StartTabLoaded && current is StartTabLoaded),
       builder: (context, state) {
-        return state is StartTabInitial
+        return state is! StartTabLoaded
             ? const SpinKitRotatingCircle(color: Colors.blue, size: 50.0)
             : Scaffold(
-                body: OSMFlutter(
-                  controller: (state as StartTabLoaded).mapController,
-                  trackMyPosition: true,
-                  initZoom: 16,
-                  minZoomLevel: 8,
-                  maxZoomLevel: 18,
-                  stepZoom: 1.0,
-                  userLocationMarker: UserLocationMaker(
-                    personMarker: const MarkerIcon(
-                      icon: Icon(
-                        Icons.circle,
-                        color: Colors.blue,
-                        size: 48,
-                      ),
-                    ),
-                    directionArrowMarker: const MarkerIcon(
-                      icon: Icon(
-                        Icons.navigation,
-                        color: Colors.blue,
-                        size: 48,
-                      ),
-                    ),
+                body: FlutterMap(
+                  mapController: MapController(),
+                  options: MapOptions(
+                    zoom: 16.0,
+                    maxZoom: 18.0,
+                    minZoom: 6.0,
+                    interactiveFlags:
+                        InteractiveFlag.all & ~InteractiveFlag.rotate,
+                    center: LatLng(state.position.latitudeInDegrees,
+                        state.position.longitudeInDegrees),
                   ),
-                  //onLocationChanged: (geoPoint) {},
-                  mapIsLoading: const Center(
-                    child:
-                        SpinKitRotatingCircle(color: Colors.blue, size: 50.0),
-                  ),
+                  children: [
+                    getOpenStreetMapTileLayer(),
+                    BlocBuilder<StartTabBloc, StartTabState>(
+                      builder: (context, state) {
+                        StartTabLoaded stateLoaded = (state as StartTabLoaded);
+                        return MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(
+                                stateLoaded.position.latitudeInDegrees,
+                                stateLoaded.position.longitudeInDegrees,
+                              ),
+                              builder: (context) => const Icon(
+                                Icons.circle_rounded,
+                                color: Colors.blue,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.endFloat,

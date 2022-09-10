@@ -7,19 +7,16 @@ abstract class StartTabEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class LocationLoaded extends StartTabEvent {
+  final Position position;
+
+  const LocationLoaded({required this.position});
+}
+
 class SettingsLoaded extends StartTabEvent {
   final Settings settings;
 
   const SettingsLoaded({required this.settings});
-}
-
-class MapTileLayerSettingChanged extends StartTabEvent {
-  final MapTileLayer mapTileLayer;
-
-  const MapTileLayerSettingChanged({required this.mapTileLayer});
-
-  @override
-  List<Object?> get props => [mapTileLayer];
 }
 
 class AutoPauseSettingChanged extends StartTabEvent {
@@ -45,7 +42,8 @@ class StartEvent extends StartTabEvent {
   const StartEvent();
 }
 
-/// When the start activity modal sheet is closed
-class StartActivitySheetClosed extends StartTabEvent {
-  const StartActivitySheetClosed();
+class PositionChanged extends StartTabEvent {
+  final Position position;
+
+  const PositionChanged({required this.position});
 }

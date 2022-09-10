@@ -11,25 +11,48 @@ class StartTabInitial extends StartTabState {
   const StartTabInitial();
 }
 
-class StartTabLoaded extends StartTabState {
-  const StartTabLoaded({required this.mapController, required this.settings});
-
-  /// The controller of the map.
-  final MapController mapController;
+/// When all parameters are not available.
+class StartTabLoading extends StartTabState {
+  const StartTabLoading({this.settings, this.position});
 
   /// Settings of the app.
-  final Settings settings;
+  final Settings? settings;
 
-  StartTabLoaded copyWith({
-    MapController? mapController,
+  /// Current Location
+  final Position? position;
+
+  StartTabLoading copyWith({
     Settings? settings,
+    Position? position,
   }) {
-    return StartTabLoaded(
-      mapController: mapController ?? this.mapController,
+    return StartTabLoading(
       settings: settings ?? this.settings,
+      position: position ?? this.position,
     );
   }
 
   @override
-  List<Object> get props => [settings];
+  List<Object?> get props => [settings, position];
+}
+
+class StartTabLoaded extends StartTabState {
+  const StartTabLoaded({required this.settings, required this.position});
+
+  /// Settings of the app.
+  final Settings settings;
+  /// Current Location
+  final Position position;
+
+  StartTabLoaded copyWith({
+    Settings? settings,
+    Position? position,
+  }) {
+    return StartTabLoaded(
+      settings: settings ?? this.settings,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  List<Object> get props => [settings, position];
 }
