@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/core/domain/entities/position.dart';
+import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 
 import 'blocs/ongoing_activity_bloc.dart';
@@ -32,22 +34,6 @@ class OngoingActivityView extends StatelessWidget {
     return false;
   }
 
-  void _onMapIsReady(BuildContext context, bool ready) {
-    if (ready) {
-      context.read<OngoingActivityBloc>().add(StartEvent());
-    }
-  }
-
-  void _onLocationChanged(BuildContext context, GeoPoint geoPoint) {
-    context.read<OngoingActivityBloc>().add(
-          NewLocationEvent(
-            position: Position(
-                latitudeInDegrees: geoPoint.latitude,
-                longitudeInDegrees: geoPoint.longitude),
-          ),
-        );
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -58,39 +44,52 @@ class OngoingActivityView extends StatelessWidget {
           children: [
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                 builder: (context, state) {
-              return OSMFlutter(
-                controller: state.mapController,
-                trackMyPosition: true,
-                initZoom: 16,
-                minZoomLevel: 8,
-                maxZoomLevel: 18,
-                stepZoom: 1.0,
-                userLocationMarker: UserLocationMaker(
-                  personMarker: const MarkerIcon(
-                    icon: Icon(
-                      Icons.circle,
-                      color: Colors.blue,
-                      size: 48,
-                    ),
-                  ),
-                  directionArrowMarker: const MarkerIcon(
-                    icon: Icon(
-                      Icons.navigation,
-                      color: Colors.blue,
-                      size: 48,
-                    ),
-                  ),
-                ),
-                onLocationChanged: (geoPoint) =>
-                    _onLocationChanged(context, geoPoint),
-                onMapIsReady: (ready) => _onMapIsReady(context, ready),
-                mapIsLoading: const Center(
-                  child: SpinKitRotatingCircle(
-                    color: Colors.blue,
-                    size: 50.0,
-                  ),
-                ),
-              );
+              return state is! OngoingActivityLoaded
+                  ? const SpinKitRotatingCircle(color: Colors.blue, size: 50.0)
+                  : FlutterMap(
+                      mapController: MapController(),
+                      options: MapOptions(
+                        zoom: 16.0,
+                        maxZoom: 18.0,
+                        minZoom: 6.0,
+                        interactiveFlags:
+                            InteractiveFlag.all & ~InteractiveFlag.rotate,
+                        center: state.lastTrackPoint.position != null
+                            ? LatLng(
+                                state
+                                    .lastTrackPoint.position!.latitudeInDegrees,
+                                state.lastTrackPoint.position!
+                                    .longitudeInDegrees)
+                            : LatLng(0, 0),
+                      ),
+                      children: [
+                        getOpenStreetMapTileLayer(),
+                        BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
+                          builder: (context, state) {
+                            OngoingActivityLoaded stateLoaded =
+                                (state as OngoingActivityLoaded);
+                            return MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: stateLoaded.lastTrackPoint.position !=
+                                          null
+                                      ? LatLng(
+                                          stateLoaded.lastTrackPoint.position!
+                                              .latitudeInDegrees,
+                                          stateLoaded.lastTrackPoint.position!
+                                              .longitudeInDegrees)
+                                      : LatLng(0, 0),
+                                  builder: (context) => const Icon(
+                                    Icons.circle_rounded,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    );
             }),
             SafeArea(
               child: Container(
@@ -105,11 +104,15 @@ class OngoingActivityView extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                   builder: (context, state) {
+                    Activity? activity =
+                        state is OngoingActivityLoaded ? state.activity : null;
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          state.activity.duration
+                          (activity != null
+                                  ? activity.duration
+                                  : const Duration())
                               .toString()
                               .split('.')
                               .first
@@ -125,19 +128,24 @@ class OngoingActivityView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             OngoingActivityMeasure(
-                                value: 1e-3 * state.activity.distanceInMeters,
+                                value: (activity != null
+                                    ? 1e-3 * activity.distanceInMeters
+                                    : 0),
                                 legend: AppLocalizations.of(context)!.distance,
                                 unit: 'km'),
                             OngoingActivityMeasure(
-                                value: state
-                                    .activity.averageSpeedInKilometersPerHour,
+                                value: (activity != null
+                                    ? activity.averageSpeedInKilometersPerHour
+                                    : 0),
                                 legend:
                                     AppLocalizations.of(context)!.averageSpeed,
                                 unit: 'km/h'),
                             OngoingActivityMeasure(
-                                value: state.lastTrackPoint
-                                        .speedInKilometersPerHour ??
-                                    0,
+                                value: state is OngoingActivityLoaded
+                                    ? (state.lastTrackPoint
+                                            .speedInKilometersPerHour ??
+                                        0)
+                                    : 0,
                                 legend: AppLocalizations.of(context)!.speed,
                                 unit: 'km/h'),
                           ],
@@ -153,7 +161,7 @@ class OngoingActivityView extends StatelessWidget {
         floatingActionButton:
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
           builder: (context, state) {
-            if (state is OngoingActivityRunningState) {
+            if (state is OngoingActivityLoaded) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.end,

@@ -1,16 +1,50 @@
 part of 'ongoing_activity_bloc.dart';
 
 abstract class OngoingActivityState extends Equatable {
-  const OngoingActivityState({
-    required this.mapController,
+  const OngoingActivityState();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class OngoingActivityInitial extends OngoingActivityState {
+  const OngoingActivityInitial();
+}
+
+class OngoingActivityLoading extends OngoingActivityState {
+  const OngoingActivityLoading({this.settings, this.position});
+
+  /// Settings of the app.
+  final Settings? settings;
+
+  /// Current Location
+  final Position? position;
+
+  OngoingActivityLoading copyWith({
+    Settings? settings,
+    Position? position,
+  }) {
+    return OngoingActivityLoading(
+      settings: settings ?? this.settings,
+      position: position ?? this.position,
+    );
+  }
+
+  @override
+  List<Object?> get props => [settings, position];
+}
+
+class OngoingActivityLoaded extends OngoingActivityState {
+  const OngoingActivityLoaded({
+    required this.settings,
     required this.activity,
     required this.isLocked,
     required this.isPaused,
     required this.lastTrackPoint,
   });
 
-  /// The controller of the map
-  final MapController mapController;
+  /// Settings of the app.
+  final Settings settings;
 
   /// Current activity
   final Activity activity;
@@ -21,74 +55,26 @@ abstract class OngoingActivityState extends Equatable {
   /// Is the activity paused or not
   final bool isPaused;
 
-  /// Last trackpoint data event when the activity is paused
+  /// Last trackpoint data even when the activity is paused
   final TrackPoint lastTrackPoint;
 
-  copyWith({
-    MapController? mapController,
-    Activity? activity,
-    bool? isLocked,
-    bool? isPaused,
-    TrackPoint? lastTrackPoint,
-  });
-
-  @override
-  List<Object> get props => [activity, isLocked, isPaused, lastTrackPoint];
-}
-
-class OngoingActivityInitial extends OngoingActivityState {
-  const OngoingActivityInitial(
-      {required super.mapController, required super.activity})
-      : super(
-          isLocked: true,
-          isPaused: true,
-          lastTrackPoint: const TrackPoint(),
-        );
-
-  @override
-  OngoingActivityInitial copyWith({
-    MapController? mapController,
-    Activity? activity,
-
-    /// Ignored parameter
-    bool? isLocked,
-
-    /// Ignored parameter
-    bool? isPaused,
-
-    /// Ignored parameter
-    TrackPoint? lastTrackPoint,
-  }) {
-    return OngoingActivityInitial(
-      mapController: mapController ?? this.mapController,
-      activity: activity ?? this.activity,
-    );
-  }
-}
-
-class OngoingActivityRunningState extends OngoingActivityState {
-  const OngoingActivityRunningState({
-    required super.mapController,
-    required super.activity,
-    required super.isLocked,
-    required super.isPaused,
-    required super.lastTrackPoint,
-  });
-
-  @override
-  OngoingActivityRunningState copyWith({
-    MapController? mapController,
+  OngoingActivityLoaded copyWith({
+    Settings? settings,
     Activity? activity,
     bool? isLocked,
     bool? isPaused,
     TrackPoint? lastTrackPoint,
   }) {
-    return OngoingActivityRunningState(
-      mapController: mapController ?? this.mapController,
+    return OngoingActivityLoaded(
+      settings: settings ?? this.settings,
       activity: activity ?? this.activity,
       isLocked: isLocked ?? this.isLocked,
       isPaused: isPaused ?? this.isPaused,
       lastTrackPoint: lastTrackPoint ?? this.lastTrackPoint,
     );
   }
+
+  @override
+  List<Object?> get props =>
+      [settings, activity, isLocked, isPaused, lastTrackPoint];
 }

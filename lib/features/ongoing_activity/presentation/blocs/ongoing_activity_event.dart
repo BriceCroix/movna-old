@@ -7,6 +7,20 @@ abstract class OngoingActivityEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class LocationLoaded extends OngoingActivityEvent {
+  final Position position;
+
+  const LocationLoaded({required this.position});
+  List<Object> get props => [position];
+}
+
+class SettingsLoaded extends OngoingActivityEvent {
+  final Settings settings;
+
+  const SettingsLoaded({required this.settings});
+  List<Object> get props => [settings];
+}
+
 class UnlockEvent extends OngoingActivityEvent {}
 
 class LockEvent extends OngoingActivityEvent {}
@@ -21,10 +35,14 @@ class ResumeEvent extends OngoingActivityEvent {}
 
 class TimeIntervalElapsedEvent extends OngoingActivityEvent {
   final Duration duration;
+
   const TimeIntervalElapsedEvent({required this.duration});
+  List<Object> get props => [duration];
 }
 
-class NewLocationEvent extends OngoingActivityEvent{
+class PositionChangedEvent extends OngoingActivityEvent {
   final Position position;
-  const NewLocationEvent({required this.position});
+
+  const PositionChangedEvent({required this.position});
+  List<Object> get props => [position];
 }
