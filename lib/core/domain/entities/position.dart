@@ -7,7 +7,15 @@ part 'position.freezed.dart';
 /// Position on the globe.
 @freezed
 class Position with _$Position {
-  static const int earthRadiusInMeters = 6371000;
+  /// Equator radius in meters (WGS84 ellipsoid).
+  static const double equatorRadiusInMeters = 6378137.0;
+
+  /// Polar radius in meters (WGS84 ellipsoid).
+  static const double polarRadiusInMeters = 6356752.314245;
+
+  /// Earth approximate radius in meters.
+  static const double earthRadiusInMeters =
+      (equatorRadiusInMeters + polarRadiusInMeters) / 2;
 
   const Position._();
 
@@ -20,20 +28,25 @@ class Position with _$Position {
   }) = _Position;
 
   double get latitudeInRadiant => latitudeInDegrees * pi / 180;
+
   double get longitudeInRadiant => longitudeInDegrees * pi / 180;
 
   /// Computes distance in meters between this position and [other] position,
   /// using Haversine formula.
   double distanceInMetersFrom(Position other) {
-    final deltaLatitudeInRadiant = (other.latitudeInRadiant-latitudeInRadiant);
-    final deltaLongitudeInRadiant = (other.longitudeInRadiant-longitudeInRadiant);
+    final sinDLat = sin((other.latitudeInRadiant - latitudeInRadiant) / 2);
+    final sinDLng = sin((other.longitudeInRadiant - longitudeInRadiant) / 2);
 
-    final a = sin(deltaLatitudeInRadiant/2) * sin(deltaLatitudeInRadiant/2) +
-    cos(latitudeInRadiant) * cos(other.latitudeInRadiant) *
-    sin(deltaLongitudeInRadiant/2) * sin(deltaLongitudeInRadiant/2);
-    final c = 2 * atan2(sqrt(a), sqrt(1-a));
+    // Sides
+    final double a = sinDLat * sinDLat +
+        sinDLng *
+            sinDLng *
+            cos(latitudeInRadiant) *
+            cos(other.latitudeInRadiant);
+    final double c = 2 * atan2(sqrt(a), sqrt(1.0 - a));
 
     return earthRadiusInMeters * c;
+
     // TODO : take into account altitude if available (pythagorean)
   }
 }
