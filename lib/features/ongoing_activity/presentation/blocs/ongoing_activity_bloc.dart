@@ -26,7 +26,18 @@ class OngoingActivityBloc
   final SaveSettings _saveSettings;
   final GetPosition _getPosition;
   final GetPositionStream _getPositionStream;
+
+  /// Stream yielding activity duration.
   StreamSubscription<Duration>? _durationSubscription;
+
+  /// Stream yielding user positions.
+  StreamSubscription<Position>? _positionSubscription;
+
+  /// Countdown timer, automatic lock pushed when duration is out.
+  Timer? _automaticLockTimer;
+
+  /// Countdown timer, automatic pause pushed when duration is out.
+  Timer? _automaticPauseTimer;
 
   OngoingActivityBloc(
     this._saveActivity,
@@ -50,7 +61,8 @@ class OngoingActivityBloc
     _getPosition().then((position) => add(LocationLoaded(position: position)));
 
     _getPositionStream().then((stream) {
-      stream.listen((event) => add(PositionChangedEvent(position: event)));
+      _positionSubscription =
+          stream.listen((event) => add(PositionChangedEvent(position: event)));
     });
   }
 
@@ -64,7 +76,7 @@ class OngoingActivityBloc
       emit(stateLoading.copyWith(settings: settings));
       add(StartEvent());
       // If more than two fields to load in the future, add an if to check
-      // what fields are loaded
+      // that all fields are loaded before adding start event
     }
   }
 
@@ -78,7 +90,7 @@ class OngoingActivityBloc
       emit(stateLoading.copyWith(position: position));
       add(StartEvent());
       // If more than two fields to load in the future, add an if to check
-      // what fields are loaded
+      // that all fields are loaded before adding start event
     }
   }
 
@@ -87,6 +99,8 @@ class OngoingActivityBloc
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       _durationSubscription?.pause();
       emit(stateLoaded.copyWith(isPaused: true));
+      _cancelAutomaticLockTimer();
+      _cancelAutomaticPauseTimer();
     }
   }
 
@@ -94,9 +108,11 @@ class OngoingActivityBloc
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       _durationSubscription?.cancel();
+      _positionSubscription?.cancel();
       // Save activity with accurate stopDate
       _saveActivity(stateLoaded.activity.copyWith(stopTime: DateTime.now()));
-      // TODO : return to home page from bloc
+      _cancelAutomaticLockTimer();
+      _cancelAutomaticPauseTimer();
     }
   }
 
@@ -105,6 +121,7 @@ class OngoingActivityBloc
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       _durationSubscription?.resume();
       emit(stateLoaded.copyWith(isPaused: false, isLocked: true));
+      _resetAutomaticPauseTimer();
     }
   }
 
@@ -119,9 +136,9 @@ class OngoingActivityBloc
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       emit(stateLoaded.copyWith(isLocked: false));
+      _resetAutomaticLockTimer();
     }
   }
-  //TODO handle autolock by starting a chronometer when unlocking, then push a lock event if nothing happens after that
 
   void _onStartEvent(StartEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityLoading) {
@@ -142,6 +159,7 @@ class OngoingActivityBloc
           ),
         ),
       );
+      _resetAutomaticPauseTimer();
     }
   }
 
@@ -159,7 +177,6 @@ class OngoingActivityBloc
 
   void _onPositionChangedEvent(
       PositionChangedEvent event, Emitter<OngoingActivityState> emit) {
-    //TODO : start a chronometer to measure time without position change
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
 
@@ -182,17 +199,23 @@ class OngoingActivityBloc
               trackPoints: [...stateLoaded.activity.trackPoints, newTrackpoint])
           : stateLoaded.activity;
 
-      // Handle automatic pause is activated
+      // Handle automatic pause if activated
       late bool newIsPaused;
-      if(stateLoaded.settings.automaticPause && speedInKmPerHour != null){
-        newIsPaused = speedInKmPerHour < stateLoaded.settings.automaticPauseThresholdSpeedInKilometersPerHour;
-        if(newIsPaused && !stateLoaded.isPaused){
+      if (stateLoaded.settings.automaticPause && speedInKmPerHour != null) {
+        newIsPaused = speedInKmPerHour <
+            stateLoaded
+                .settings.automaticPauseThresholdSpeedInKilometersPerHour;
+        if (newIsPaused && !stateLoaded.isPaused) {
           add(PauseEvent());
+        } else if (!newIsPaused && stateLoaded.isPaused) {
+          add(ResumeEvent());
         }
-      }else{
+      } else {
         newIsPaused = stateLoaded.isPaused;
       }
-
+      if (!newIsPaused) {
+        _resetAutomaticPauseTimer();
+      }
 
       // Finally emit state
       emit(stateLoaded.copyWith(
@@ -201,5 +224,45 @@ class OngoingActivityBloc
         isPaused: newIsPaused,
       ));
     }
+  }
+
+  /// Resets the automatic lock timer according to user settings.
+  void _resetAutomaticLockTimer() {
+    if (state is OngoingActivityLoaded) {
+      OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
+      if (stateLoaded.settings.automaticLock) {
+        _automaticLockTimer?.cancel();
+        _automaticLockTimer = Timer(
+            stateLoaded.settings.automaticLockThresholdDurationWithoutInput,
+            () {
+          add(LockEvent());
+        });
+      }
+    }
+  }
+
+  /// Cancels the automatic lock timer if started.
+  void _cancelAutomaticLockTimer() {
+    _automaticLockTimer?.cancel();
+  }
+
+  /// Resets the automatic pause timer according to user settings.
+  void _resetAutomaticPauseTimer() {
+    if (state is OngoingActivityLoaded) {
+      OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
+      if (stateLoaded.settings.automaticPause) {
+        _automaticPauseTimer?.cancel();
+        _automaticPauseTimer = Timer(
+            stateLoaded.settings.automaticPauseThresholdDurationWithoutMovement,
+            () {
+          add(PauseEvent());
+        });
+      }
+    }
+  }
+
+  /// Cancels the automatic pause timer if started.
+  void _cancelAutomaticPauseTimer() {
+    _automaticPauseTimer?.cancel();
   }
 }

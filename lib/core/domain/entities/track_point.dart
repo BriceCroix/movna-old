@@ -23,10 +23,10 @@ class TrackPoint with _$TrackPoint {
         dateTime != null &&
         previous.position != null &&
         previous.dateTime != null) {
-      return 3600 *
-          1e-3 *
-          position!.distanceInMetersFrom(previous.position!) /
-          dateTime!.difference(previous.dateTime!).inSeconds;
+      double distance = position!.distanceInMetersFrom(previous.position!);
+      int duration =
+          dateTime!.difference(previous.dateTime!).inMilliseconds;
+      return duration > 0 ? 3600000 * 1e-3 * distance / duration : 0;
     } else {
       return null;
     }

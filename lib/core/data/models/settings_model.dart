@@ -12,7 +12,8 @@ class SettingsModel with _$SettingsModel {
   @JsonSerializable(explicitToJson: true)
   const factory SettingsModel({
     // OngoingActivitySettings -------------------------------------------------
-    @Default(true)  bool automaticPause,
+    @Default(true) bool automaticPause,
+    @Default(true) bool automaticLock,
     @Default(Sport.other) Sport sport,
     @Default(MapTileLayer.openStreetMap) MapTileLayer mapTileLayer,
 
@@ -23,8 +24,11 @@ class SettingsModel with _$SettingsModel {
     @Default(Gender.undefined) Gender userGender,
 
     // Miscellaneous -----------------------------------------------------------
-    @Default(2) double automaticPauseThresholdSpeedInKilometersPerHour,
-    @Default(Duration(seconds: 3)) Duration automaticPauseThresholdDurationWithoutMovement,
+    @Default(1.5) double automaticPauseThresholdSpeedInKilometersPerHour,
+    @Default(Duration(seconds: 3))
+        Duration automaticPauseThresholdDurationWithoutMovement,
+    @Default(Duration(seconds: 3))
+        Duration automaticLockThresholdDurationWithoutInput,
   }) = _SettingsModel;
 
   factory SettingsModel.fromJson(Map<String, Object?> json) =>
@@ -32,6 +36,7 @@ class SettingsModel with _$SettingsModel {
 
   static SettingsModel fromSettings(Settings settings) => SettingsModel(
         automaticPause: settings.automaticPause,
+        automaticLock: settings.automaticLock,
         sport: settings.sport,
         mapTileLayer: settings.mapTileLayer,
         userName: settings.userName,
@@ -42,19 +47,23 @@ class SettingsModel with _$SettingsModel {
             settings.automaticPauseThresholdSpeedInKilometersPerHour,
         automaticPauseThresholdDurationWithoutMovement:
             settings.automaticPauseThresholdDurationWithoutMovement,
+        automaticLockThresholdDurationWithoutInput:
+            settings.automaticLockThresholdDurationWithoutInput,
       );
 
   Settings toSettings() => Settings(
-        automaticPause: automaticPause,
-        sport: sport,
-        mapTileLayer: mapTileLayer,
-        userName: userName,
-        userHeightInMeters: userHeightInMeters,
-        userWeightInKilograms: userWeightInKilograms,
-        userGender: userGender,
-        automaticPauseThresholdSpeedInKilometersPerHour:
-            automaticPauseThresholdSpeedInKilometersPerHour,
-        automaticPauseThresholdDurationWithoutMovement:
-            automaticPauseThresholdDurationWithoutMovement,
-      );
+      automaticPause: automaticPause,
+      automaticLock: automaticLock,
+      sport: sport,
+      mapTileLayer: mapTileLayer,
+      userName: userName,
+      userHeightInMeters: userHeightInMeters,
+      userWeightInKilograms: userWeightInKilograms,
+      userGender: userGender,
+      automaticPauseThresholdSpeedInKilometersPerHour:
+          automaticPauseThresholdSpeedInKilometersPerHour,
+      automaticPauseThresholdDurationWithoutMovement:
+          automaticPauseThresholdDurationWithoutMovement,
+      automaticLockThresholdDurationWithoutInput:
+          automaticLockThresholdDurationWithoutInput);
 }

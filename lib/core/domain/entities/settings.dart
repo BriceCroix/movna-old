@@ -51,11 +51,10 @@ class Settings with _$Settings {
     // @Default(UnitType.metric) UnitType unitType,
 
     /// Should the screen automatically lock itself during an activity.
-    @Default(true) bool automaticLock,
+    required bool automaticLock,
 
     /// The duration without user input to lock the screen during an activity.
-    @Default(Duration(seconds: 5))
-        Duration automaticLockThresholdDurationWithoutInput,
+    required Duration automaticLockThresholdDurationWithoutInput,
   }) = _Settings;
 }
 

@@ -46,7 +46,7 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
     } else if (state is StartTabLoading) {
       StartTabLoading stateLoading = state as StartTabLoading;
       // If more than two fields to load in the future, add an if to check
-      // what fields are loaded
+      // that all fields are loaded before emitting loaded state
       emit(
           StartTabLoaded(settings: settings, position: stateLoading.position!));
     }
@@ -59,7 +59,7 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
     } else if (state is StartTabLoading) {
       StartTabLoading stateLoading = state as StartTabLoading;
       // If more than two fields to load in the future, add an if to check
-      // what fields are loaded
+      // that all fields are loaded before emitting loaded state
       emit(
           StartTabLoaded(settings: stateLoading.settings!, position: position));
     }
