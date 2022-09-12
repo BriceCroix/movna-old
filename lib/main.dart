@@ -3,6 +3,6 @@ import 'app.dart';
 import 'core/injection.dart';
 
 Future<void> main() async{
-  configureDependencies();
+  setUpInjector();
   runApp(const MovnaApp());
 }

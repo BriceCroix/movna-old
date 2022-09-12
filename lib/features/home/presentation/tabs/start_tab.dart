@@ -6,9 +6,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
-import 'package:movna/features/ongoing_activity/presentation/ongoing_activity_page.dart';
 
 class StartTab extends StatelessWidget {
   const StartTab({super.key});
@@ -84,12 +84,7 @@ class StartTabView extends StatelessWidget {
               ),
               ElevatedButton.icon(
                 onPressed: () {
-                  // TODO handle navigation better
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const OngoingActivityPage()),
-                  );
+                  navigateTo(RouteName.ongoingActivity);
                 },
                 icon: const Icon(Icons.play_arrow_rounded),
                 label: Text(AppLocalizations.of(context)!.start),
