@@ -19,5 +19,6 @@
     "history": "History",
     "automaticPause": "Automatic pause",
     "automaticLock": "Automatic lock",
-    "start": "Start"
+    "start": "Start",
+    "sport": "Sport"
 }

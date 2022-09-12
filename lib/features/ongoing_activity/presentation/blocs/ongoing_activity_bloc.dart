@@ -66,6 +66,13 @@ class OngoingActivityBloc
     });
   }
 
+  @override
+  Future<void> close() {
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    return super.close();
+  }
+
   void _onSettingsLoaded(
       SettingsLoaded event, Emitter<OngoingActivityState> emit) {
     final Settings settings = event.settings;
@@ -150,7 +157,10 @@ class OngoingActivityBloc
       emit(
         OngoingActivityLoaded(
           settings: stateLoading.settings!,
-          activity: Activity(startTime: now, stopTime: DateTime(0)),
+          activity: Activity(
+              startTime: now,
+              stopTime: DateTime(0),
+              sport: stateLoading.settings!.sport),
           isLocked: true,
           isPaused: false,
           lastTrackPoint: TrackPoint(
@@ -194,10 +204,20 @@ class OngoingActivityBloc
       );
 
       // Only update activity if not paused
-      Activity newActivity = (!stateLoaded.isPaused)
-          ? stateLoaded.activity.copyWith(
-              trackPoints: [...stateLoaded.activity.trackPoints, newTrackpoint])
-          : stateLoaded.activity;
+      late Activity newActivity;
+      if (!stateLoaded.isPaused) {
+        // Compute distance
+        double lastDistance = newTrackpoint.position!
+            .distanceInMetersFrom(stateLoaded.lastTrackPoint.position!);
+        double totalDistance =
+            stateLoaded.activity.distanceInMeters + lastDistance;
+        newActivity = stateLoaded.activity.copyWith(
+          trackPoints: [...stateLoaded.activity.trackPoints, newTrackpoint],
+          distanceInMeters: totalDistance,
+        );
+      } else {
+        newActivity = stateLoaded.activity;
+      }
 
       // Handle automatic pause if activated
       late bool newIsPaused;

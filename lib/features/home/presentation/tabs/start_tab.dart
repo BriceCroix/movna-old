@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
@@ -35,11 +36,34 @@ class StartTabView extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Text(AppLocalizations.of(context)!.sport),
+                  DropdownButton<Sport>(
+                    value: state.settings.sport,
+                    onChanged: (Sport? value) {
+                      if(value != null) {
+                        context
+                            .read<StartTabBloc>()
+                            .add(SportSettingChanged(sport: value));
+                      }
+                    },
+                    items: Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
+                      return DropdownMenuItem<Sport>(
+                        value: value,
+                        //TODO : translate name
+                        child: Text(value.name),
+                      );
+                    }).toList(),
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(AppLocalizations.of(context)!.automaticPause),
                   Checkbox(
                     tristate: false,
                     value: state.settings.automaticPause,
-                    onChanged: (value) => context
+                    onChanged: (bool? value) => context
                         .read<StartTabBloc>()
                         .add(AutoPauseSettingChanged(autoPause: value!)),
                   ),
@@ -52,7 +76,7 @@ class StartTabView extends StatelessWidget {
                   Checkbox(
                     tristate: false,
                     value: state.settings.automaticLock,
-                    onChanged: (value) => context
+                    onChanged: (bool? value) => context
                         .read<StartTabBloc>()
                         .add(AutoLockSettingChanged(autoLock: value!)),
                   ),

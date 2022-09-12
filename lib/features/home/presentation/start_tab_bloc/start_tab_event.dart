@@ -19,6 +19,15 @@ class SettingsLoaded extends StartTabEvent {
   const SettingsLoaded({required this.settings});
 }
 
+class SportSettingChanged extends StartTabEvent {
+  final Sport sport;
+
+  const SportSettingChanged({required this.sport});
+
+  @override
+  List<Object?> get props => [sport];
+}
+
 class AutoPauseSettingChanged extends StartTabEvent {
   final bool autoPause;
 
