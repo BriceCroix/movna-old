@@ -6,6 +6,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/domain/entities/position.dart';
+import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
@@ -69,6 +71,41 @@ class OngoingActivityView extends StatelessWidget {
                       children: [
                         getOpenStreetMapTileLayer(),
                         BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
+                          buildWhen: (previous, current) =>
+                              (previous as OngoingActivityLoaded)
+                                  .activity
+                                  .trackPoints !=
+                              (current as OngoingActivityLoaded)
+                                  .activity
+                                  .trackPoints,
+                          builder: (context, state) {
+                            OngoingActivityLoaded stateLoaded =
+                                (state as OngoingActivityLoaded);
+                            List<LatLng> points = [];
+                            for (TrackPoint t
+                                in stateLoaded.activity.trackPoints) {
+                              if (t.position != null) {
+                                points.add(LatLng(t.position!.latitudeInDegrees,
+                                    t.position!.longitudeInDegrees));
+                              }
+                            }
+                            return PolylineLayer(
+                              polylineCulling: false,
+                              polylines: [
+                                Polyline(
+                                  points: points,
+                                  color: _getUserColor(context),
+                                  strokeWidth: 4,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                        BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
+                          buildWhen: (previous, current) =>
+                              (previous as OngoingActivityLoaded)
+                                  .lastTrackPoint !=
+                              (current as OngoingActivityLoaded).lastTrackPoint,
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
@@ -100,8 +137,9 @@ class OngoingActivityView extends StatelessWidget {
                                   Icons.circle_rounded,
                                   color: _getUserColor(context),
                                 ),
-                              ],
-                            );
+                              ));
+                            }
+                            return MarkerLayer(markers: markers);
                           },
                         ),
                       ],
@@ -209,6 +247,8 @@ class OngoingActivityView extends StatelessWidget {
                                 state.isPaused ? StopEvent() : PauseEvent());
                             if (state.isPaused) {
                               // TODO : handle navigation better
+                              // TODO : push replacement to statistics page
+                              // cannot push as is since activity does not have a stop date
                               Navigator.of(context).pop();
                             }
                           },

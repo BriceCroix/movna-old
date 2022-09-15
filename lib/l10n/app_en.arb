@@ -20,5 +20,10 @@
     "automaticPause": "Automatic pause",
     "automaticLock": "Automatic lock",
     "start": "Start",
-    "sport": "Sport"
+    "sport": "Sport",
+
+    "startTime": "Starting time",
+    "endTime": "Ending time",
+    "duration": "Duration",
+    "pauseDuration": "Pause duration"
 }

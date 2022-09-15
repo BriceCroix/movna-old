@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movna/core/presentation/router/router.dart';
 
 class ActivityCard extends StatelessWidget {
   final Activity activity;
@@ -62,18 +63,21 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String date = DateFormat.yMMMMd(Localizations.localeOf(context).toString()).format(activity.startTime);
+    String date = DateFormat.yMMMMd(Localizations.localeOf(context).toString())
+        .format(activity.startTime);
     String duration = activity.duration.toString();
     // remove .mmmmmm
-    duration = duration.substring(0, duration.length-7);
-    String distance = '${(activity.distanceInMeters * 1e-3).toStringAsFixed(1)} km';
+    duration = duration.substring(0, duration.length - 7);
+    String distance =
+        '${(activity.distanceInMeters * 1e-3).toStringAsFixed(1)} km';
     return Card(
       child: ListTile(
         leading: Icon(getSportIcon(activity.sport)),
-        title: Text(activity.name ??
-            '${AppLocalizations.of(context)!.activity} $date'),
+        title: Text(
+            activity.name ?? '${AppLocalizations.of(context)!.activity} $date'),
         subtitle: Text('$date, $duration, $distance'),
         dense: true,
+        onTap: () => navigateTo(RouteName.pastActivity, activity),
       ),
     );
   }

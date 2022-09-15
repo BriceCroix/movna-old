@@ -17,5 +17,10 @@
     "automaticPause": "Pause automatique",
     "automaticLock": "Verrouillage automatique",
     "start": "Commencer",
-    "sport": "Sport"
+    "sport": "Sport",
+
+    "startTime": "Début",
+    "endTime": "Fin",
+    "duration": "Durée",
+    "pauseDuration": "Durée de pause"
 }

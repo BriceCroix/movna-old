@@ -7,14 +7,9 @@ import 'package:movna/core/domain/repositories/activities_repository.dart';
 import 'package:movna/features/home/presentation/widgets/activity_card.dart';
 import 'package:movna/features/home/presentation/widgets/history_titled_box.dart';
 
-class HistoryTab extends StatefulWidget {
+class HistoryTab extends StatelessWidget {
   const HistoryTab({Key? key}) : super(key: key);
 
-  @override
-  State<HistoryTab> createState() => _HistoryTabState();
-}
-
-class _HistoryTabState extends State<HistoryTab> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -61,9 +56,13 @@ class _HistoryTabState extends State<HistoryTab> {
         Expanded(
           child: HistoryTitledBox(
             title: AppLocalizations.of(context)!.statistics,
+            //TODO
             child: const Center(child: Text('TODO')),
+            onMorePressed: () {
+              //TODO : Navigator push statistics page
+            },
           ),
-        ), // TODO
+        ),
       ],
     );
   }

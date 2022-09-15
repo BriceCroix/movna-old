@@ -40,6 +40,7 @@ class StartTabLoaded extends StartTabState {
 
   /// Settings of the app.
   final Settings settings;
+
   /// Current Location
   final Position position;
 
