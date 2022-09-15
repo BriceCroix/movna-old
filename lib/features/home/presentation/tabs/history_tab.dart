@@ -30,9 +30,9 @@ class _HistoryTabState extends State<HistoryTab> {
               future: injector<ActivitiesRepository>().getActivities(),
               builder: (context, AsyncSnapshot<List<Activity>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
+                  return Center(
                     child: SpinKitRotatingCircle(
-                      color: Colors.blue,
+                      color: Theme.of(context).colorScheme.secondary,
                       size: 50.0,
                     ),
                   );

@@ -34,18 +34,22 @@ class OngoingActivityView extends StatelessWidget {
     return false;
   }
 
+  Color _getUserColor(BuildContext context) =>
+      Theme.of(context).colorScheme.secondary;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        // https://pub.dev/packages/flutter_osm_plugin
         body: Stack(
           children: [
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                 builder: (context, state) {
               return state is! OngoingActivityLoaded
-                  ? const SpinKitRotatingCircle(color: Colors.blue, size: 50.0)
+                  ? SpinKitRotatingCircle(
+                      color: Theme.of(context).colorScheme.secondary,
+                      size: 50.0)
                   : FlutterMap(
                       mapController: MapController(),
                       options: MapOptions(
@@ -68,21 +72,33 @@ class OngoingActivityView extends StatelessWidget {
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
-                            return MarkerLayer(
-                              markers: [
-                                Marker(
-                                  point: stateLoaded.lastTrackPoint.position !=
-                                          null
-                                      ? LatLng(
-                                          stateLoaded.lastTrackPoint.position!
-                                              .latitudeInDegrees,
-                                          stateLoaded.lastTrackPoint.position!
-                                              .longitudeInDegrees)
-                                      : LatLng(0, 0),
-                                  builder: (context) => const Icon(
-                                    Icons.circle_rounded,
-                                    color: Colors.blue,
-                                  ),
+                            List<Marker> markers = [];
+                            // Add starting point
+                            if (stateLoaded.activity.trackPoints.isNotEmpty &&
+                                stateLoaded
+                                        .activity.trackPoints.first.position !=
+                                    null) {
+                              Position start = stateLoaded
+                                  .activity.trackPoints.first.position!;
+                              markers.add(Marker(
+                                point: LatLng(start.latitudeInDegrees,
+                                    start.longitudeInDegrees),
+                                builder: (context) => const Icon(
+                                  Icons.circle_rounded,
+                                  color: Colors.green,
+                                ),
+                              ));
+                            }
+                            // Add current position
+                            Position? current =
+                                stateLoaded.lastTrackPoint.position;
+                            if (current != null) {
+                              markers.add(Marker(
+                                point: LatLng(current.latitudeInDegrees,
+                                    current.longitudeInDegrees),
+                                builder: (context) => Icon(
+                                  Icons.circle_rounded,
+                                  color: _getUserColor(context),
                                 ),
                               ],
                             );
@@ -128,26 +144,29 @@ class OngoingActivityView extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             OngoingActivityMeasure(
-                                value: (activity != null
-                                    ? 1e-3 * activity.distanceInMeters
-                                    : 0),
-                                legend: AppLocalizations.of(context)!.distance,
-                                unit: 'km'),
+                              value: (activity != null
+                                  ? 1e-3 * activity.distanceInMeters
+                                  : 0),
+                              legend: AppLocalizations.of(context)!.distance,
+                              unit: 'km',
+                            ),
                             OngoingActivityMeasure(
-                                value: (activity != null
-                                    ? activity.averageSpeedInKilometersPerHour
-                                    : 0),
-                                legend:
-                                    AppLocalizations.of(context)!.averageSpeed,
-                                unit: 'km/h'),
+                              value: (activity != null
+                                  ? activity.averageSpeedInKilometersPerHour
+                                  : 0),
+                              legend:
+                                  AppLocalizations.of(context)!.averageSpeed,
+                              unit: 'km/h',
+                            ),
                             OngoingActivityMeasure(
-                                value: state is OngoingActivityLoaded
-                                    ? (state.lastTrackPoint
-                                            .speedInKilometersPerHour ??
-                                        0)
-                                    : 0,
-                                legend: AppLocalizations.of(context)!.speed,
-                                unit: 'km/h'),
+                              value: state is OngoingActivityLoaded
+                                  ? (state.lastTrackPoint
+                                          .speedInKilometersPerHour ??
+                                      0)
+                                  : 0,
+                              legend: AppLocalizations.of(context)!.speed,
+                              unit: 'km/h',
+                            ),
                           ],
                         ),
                       ],
@@ -200,6 +219,7 @@ class OngoingActivityView extends StatelessWidget {
                   const SizedBox(height: 8),
 
                   /// Lock, Unlock or resume button depending on whether is paused or not
+                  //TODO redo all these buttons, separate pause, stop etc and show with Flow
                   FloatingActionButton(
                     heroTag: 'lock_resume',
                     backgroundColor:

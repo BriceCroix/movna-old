@@ -35,9 +35,9 @@ class _HomePageState extends State<HomePage>{
       ),
       bottomNavigationBar: BottomNavigationBar(
         elevation: 8,
-        unselectedItemColor: Colors.grey,
-        selectedItemColor: Theme.of(context).primaryColor,
-        backgroundColor: Colors.white,
+        //unselectedItemColor: Colors.grey,
+        //selectedItemColor: Theme.of(context).primaryColor,
+        //backgroundColor: Colors.white,
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: const Icon(Icons.account_circle),

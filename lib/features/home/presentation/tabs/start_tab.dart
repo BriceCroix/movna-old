@@ -25,6 +25,9 @@ class StartTab extends StatelessWidget {
 class StartTabView extends StatelessWidget {
   const StartTabView({super.key});
 
+  Color _getUserColor(BuildContext context) =>
+      Theme.of(context).colorScheme.secondary;
+
   Widget _buildStartBottomSheet(BuildContext context) {
     return BlocBuilder<StartTabBloc, StartTabState>(
       builder: (context, state) {
@@ -40,13 +43,14 @@ class StartTabView extends StatelessWidget {
                   DropdownButton<Sport>(
                     value: state.settings.sport,
                     onChanged: (Sport? value) {
-                      if(value != null) {
+                      if (value != null) {
                         context
                             .read<StartTabBloc>()
                             .add(SportSettingChanged(sport: value));
                       }
                     },
-                    items: Sport.values.map<DropdownMenuItem<Sport>>((Sport value) {
+                    items: Sport.values
+                        .map<DropdownMenuItem<Sport>>((Sport value) {
                       return DropdownMenuItem<Sport>(
                         value: value,
                         //TODO : translate name
@@ -103,7 +107,10 @@ class StartTabView extends StatelessWidget {
           (previous is! StartTabLoaded && current is StartTabLoaded),
       builder: (context, state) {
         return state is! StartTabLoaded
-            ? const SpinKitRotatingCircle(color: Colors.blue, size: 50.0)
+            ? SpinKitRotatingCircle(
+                color: Theme.of(context).colorScheme.secondary,
+                size: 50.0,
+              )
             : Scaffold(
                 body: FlutterMap(
                   mapController: MapController(),
@@ -128,9 +135,9 @@ class StartTabView extends StatelessWidget {
                                 stateLoaded.position.latitudeInDegrees,
                                 stateLoaded.position.longitudeInDegrees,
                               ),
-                              builder: (context) => const Icon(
+                              builder: (context) => Icon(
                                 Icons.circle_rounded,
-                                color: Colors.blue,
+                                color: _getUserColor(context),
                               ),
                             ),
                           ],

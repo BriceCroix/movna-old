@@ -12,10 +12,16 @@ class MovnaApp extends StatelessWidget {
       title: 'Movna',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      //theme: TODO,
       navigatorKey: injector<GlobalKey<NavigatorState>>(),
       onGenerateRoute: generateRoute,
       initialRoute: RouteName.home.name,
+      theme: ThemeData(
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: Colors.green[700],
+          secondary: Colors.blueAccent,
+        )
+      ),
     );
   }
 }
