@@ -17,13 +17,15 @@ class StartTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => injector<StartTabBloc>(),
-      child: const StartTabView(),
+      child: StartTabView(),
     );
   }
 }
 
 class StartTabView extends StatelessWidget {
-  const StartTabView({super.key});
+  StartTabView({super.key});
+
+  final MapController _mapController = MapController();
 
   Color _getUserColor(BuildContext context) =>
       Theme.of(context).colorScheme.secondary;
@@ -113,7 +115,7 @@ class StartTabView extends StatelessWidget {
               )
             : Scaffold(
                 body: FlutterMap(
-                  mapController: MapController(),
+                  mapController: _mapController,
                   options: MapOptions(
                     zoom: 16.0,
                     maxZoom: 18.0,
@@ -152,7 +154,6 @@ class StartTabView extends StatelessWidget {
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
-                      // The modal bottom sheet does not have access to bloc it seems
                       builder: (newContext) {
                         return BlocProvider.value(
                           value: context.read<StartTabBloc>(),

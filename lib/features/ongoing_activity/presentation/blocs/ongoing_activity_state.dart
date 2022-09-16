@@ -41,6 +41,7 @@ class OngoingActivityLoaded extends OngoingActivityState {
     required this.isLocked,
     required this.isPaused,
     required this.lastTrackPoint,
+    this.isMapReady = false,
   });
 
   /// Settings of the app.
@@ -58,12 +59,16 @@ class OngoingActivityLoaded extends OngoingActivityState {
   /// Last trackpoint data even when the activity is paused
   final TrackPoint lastTrackPoint;
 
+  /// Is the map ready or not
+  final bool isMapReady;
+
   OngoingActivityLoaded copyWith({
     Settings? settings,
     Activity? activity,
     bool? isLocked,
     bool? isPaused,
     TrackPoint? lastTrackPoint,
+    bool? isMapReady,
   }) {
     return OngoingActivityLoaded(
       settings: settings ?? this.settings,
@@ -71,12 +76,13 @@ class OngoingActivityLoaded extends OngoingActivityState {
       isLocked: isLocked ?? this.isLocked,
       isPaused: isPaused ?? this.isPaused,
       lastTrackPoint: lastTrackPoint ?? this.lastTrackPoint,
+      isMapReady: isMapReady ?? this.isMapReady,
     );
   }
 
   @override
   List<Object?> get props =>
-      [settings, activity, isLocked, isPaused, lastTrackPoint];
+      [settings, activity, isLocked, isPaused, lastTrackPoint, isMapReady];
 }
 
 /// Final state indicating that page must be changed.
@@ -89,6 +95,5 @@ class OngoingActivityDone extends OngoingActivityState {
   final Activity activity;
 
   @override
-  List<Object?> get props =>
-      [activity];
+  List<Object?> get props => [activity];
 }

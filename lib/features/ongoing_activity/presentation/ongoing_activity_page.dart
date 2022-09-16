@@ -22,13 +22,15 @@ class OngoingActivityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => injector<OngoingActivityBloc>(),
-      child: const OngoingActivityView(),
+      child: OngoingActivityView(),
     );
   }
 }
 
 class OngoingActivityView extends StatelessWidget {
-  const OngoingActivityView({Key? key}) : super(key: key);
+  OngoingActivityView({Key? key}) : super(key: key);
+
+  final MapController _mapController = MapController();
 
   /// Called when the OS return button is pressed
   Future<bool> _onWillPop() async {
@@ -53,8 +55,12 @@ class OngoingActivityView extends StatelessWidget {
                       color: Theme.of(context).colorScheme.secondary,
                       size: 50.0)
                   : FlutterMap(
-                      mapController: MapController(),
+                      mapController: _mapController,
                       options: MapOptions(
+                        slideOnBoundaries: true,
+                        onMapReady: () => context
+                            .read<OngoingActivityBloc>()
+                            .add(MapReadyEvent()),
                         zoom: 16.0,
                         maxZoom: 18.0,
                         minZoom: 6.0,
@@ -290,8 +296,18 @@ class OngoingActivityView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<OngoingActivityBloc, OngoingActivityState>(
       listener: (context, state) {
+        // Handle navigation at the end of the activity
         if (state is OngoingActivityDone) {
           navigateToReplacement(RouteName.pastActivity, state.activity);
+        } else if (state is OngoingActivityLoaded) {
+          // Handle auto center map movements if not in pause
+          if (state.isMapReady && !state.isPaused && state.lastTrackPoint.position != null) {
+            LatLng center = LatLng(
+              state.lastTrackPoint.position!.latitudeInDegrees,
+              state.lastTrackPoint.position!.longitudeInDegrees,
+            );
+            bool res = _mapController.move(center, _mapController.zoom);
+          }
         }
       },
       child: _getUI(context),

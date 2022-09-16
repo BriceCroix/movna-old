@@ -47,6 +47,7 @@ class OngoingActivityBloc
     this._getPositionStream,
   ) : super(const OngoingActivityInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
+    on<MapReadyEvent>(_onMapReadyEvent);
     on<PauseEvent>(_onPauseEvent);
     on<StopEvent>(_onStopEvent);
     on<ResumeEvent>(_onResumeEvent);
@@ -83,6 +84,14 @@ class OngoingActivityBloc
       add(StartEvent());
       // If more than two fields to load in the future, add an if to check
       // that all fields are loaded before adding start event
+    }
+  }
+
+  void _onMapReadyEvent(
+      MapReadyEvent event, Emitter<OngoingActivityState> emit) {
+    if (state is OngoingActivityLoaded) {
+      OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
+      emit(stateLoaded.copyWith(isMapReady : true));
     }
   }
 

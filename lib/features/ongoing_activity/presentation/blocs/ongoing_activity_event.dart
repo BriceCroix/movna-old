@@ -14,6 +14,8 @@ class SettingsLoaded extends OngoingActivityEvent {
   List<Object> get props => [settings];
 }
 
+class MapReadyEvent extends OngoingActivityEvent {}
+
 class UnlockEvent extends OngoingActivityEvent {}
 
 class LockEvent extends OngoingActivityEvent {}
