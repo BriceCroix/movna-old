@@ -78,3 +78,17 @@ class OngoingActivityLoaded extends OngoingActivityState {
   List<Object?> get props =>
       [settings, activity, isLocked, isPaused, lastTrackPoint];
 }
+
+/// Final state indicating that page must be changed.
+class OngoingActivityDone extends OngoingActivityState {
+  const OngoingActivityDone({
+    required this.activity,
+  });
+
+  /// Current activity
+  final Activity activity;
+
+  @override
+  List<Object?> get props =>
+      [activity];
+}

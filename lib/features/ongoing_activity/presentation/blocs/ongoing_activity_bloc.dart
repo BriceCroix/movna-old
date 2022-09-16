@@ -47,7 +47,6 @@ class OngoingActivityBloc
     this._getPositionStream,
   ) : super(const OngoingActivityInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
-    on<LocationLoaded>(_onLocationLoaded);
     on<PauseEvent>(_onPauseEvent);
     on<StopEvent>(_onStopEvent);
     on<ResumeEvent>(_onResumeEvent);
@@ -58,7 +57,7 @@ class OngoingActivityBloc
     on<TimeIntervalElapsedEvent>(_onTimeIntervalElapsedEvent);
 
     _getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
-    _getPosition().then((position) => add(LocationLoaded(position: position)));
+    _getPosition().then((position) => add(PositionChangedEvent(position: position)));
 
     _getPositionStream().then((stream) {
       _positionSubscription =
@@ -87,20 +86,6 @@ class OngoingActivityBloc
     }
   }
 
-  void _onLocationLoaded(
-      LocationLoaded event, Emitter<OngoingActivityState> emit) {
-    final Position position = event.position;
-    if (state is OngoingActivityInitial) {
-      emit(OngoingActivityLoading(position: position));
-    } else if (state is OngoingActivityLoading) {
-      OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
-      emit(stateLoading.copyWith(position: position));
-      add(StartEvent());
-      // If more than two fields to load in the future, add an if to check
-      // that all fields are loaded before adding start event
-    }
-  }
-
   void _onPauseEvent(PauseEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
@@ -117,9 +102,13 @@ class OngoingActivityBloc
       _durationSubscription?.cancel();
       _positionSubscription?.cancel();
       // Save activity with accurate stopDate
-      _saveActivity(stateLoaded.activity.copyWith(stopTime: DateTime.now()));
+      Activity activityDone =
+          stateLoaded.activity.copyWith(stopTime: DateTime.now());
+      _saveActivity(activityDone);
       _cancelAutomaticLockTimer();
       _cancelAutomaticPauseTimer();
+
+      emit(OngoingActivityDone(activity: activityDone));
     }
   }
 
@@ -154,19 +143,21 @@ class OngoingActivityBloc
       _durationSubscription = Chronometer(value: Duration.zero).tick().listen(
           (duration) => add(TimeIntervalElapsedEvent(duration: duration)));
       DateTime now = DateTime.now();
+      TrackPoint trackpoint = TrackPoint(
+        dateTime: now,
+        position: stateLoading.position!,
+      );
       emit(
         OngoingActivityLoaded(
           settings: stateLoading.settings!,
           activity: Activity(
               startTime: now,
               stopTime: DateTime(0),
-              sport: stateLoading.settings!.sport),
+              sport: stateLoading.settings!.sport,
+              trackPoints: <TrackPoint>[trackpoint]),
           isLocked: true,
           isPaused: false,
-          lastTrackPoint: TrackPoint(
-            dateTime: now,
-            position: stateLoading.position!,
-          ),
+          lastTrackPoint: trackpoint,
         ),
       );
       _resetAutomaticPauseTimer();
@@ -187,7 +178,15 @@ class OngoingActivityBloc
 
   void _onPositionChangedEvent(
       PositionChangedEvent event, Emitter<OngoingActivityState> emit) {
-    if (state is OngoingActivityLoaded) {
+    if (state is OngoingActivityInitial) {
+      emit(OngoingActivityLoading(position: event.position));
+    } else if (state is OngoingActivityLoading) {
+      OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
+      emit(stateLoading.copyWith(position: event.position));
+      add(StartEvent());
+      // If more than two fields to load in the future, add an if to check
+      // that all fields are loaded before adding start event
+    } else if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
 
       // Create new trackpoint

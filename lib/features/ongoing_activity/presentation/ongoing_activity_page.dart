@@ -9,6 +9,7 @@ import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/entities/position.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 
@@ -39,8 +40,7 @@ class OngoingActivityView extends StatelessWidget {
   Color _getUserColor(BuildContext context) =>
       Theme.of(context).colorScheme.secondary;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _getUI(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -72,12 +72,11 @@ class OngoingActivityView extends StatelessWidget {
                         getOpenStreetMapTileLayer(),
                         BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                           buildWhen: (previous, current) =>
+                              (current is OngoingActivityLoaded) &&
                               (previous as OngoingActivityLoaded)
-                                  .activity
-                                  .trackPoints !=
-                              (current as OngoingActivityLoaded)
-                                  .activity
-                                  .trackPoints,
+                                      .activity
+                                      .trackPoints !=
+                                  (current).activity.trackPoints,
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
@@ -103,9 +102,10 @@ class OngoingActivityView extends StatelessWidget {
                         ),
                         BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                           buildWhen: (previous, current) =>
+                              (current is OngoingActivityLoaded) &&
                               (previous as OngoingActivityLoaded)
-                                  .lastTrackPoint !=
-                              (current as OngoingActivityLoaded).lastTrackPoint,
+                                      .lastTrackPoint !=
+                                  current.lastTrackPoint,
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
@@ -158,8 +158,12 @@ class OngoingActivityView extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                   builder: (context, state) {
-                    Activity? activity =
-                        state is OngoingActivityLoaded ? state.activity : null;
+                    Activity? activity;
+                    if (state is OngoingActivityLoaded) {
+                      activity = state.activity;
+                    } else if (state is OngoingActivityDone) {
+                      activity = state.activity;
+                    }
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -245,12 +249,7 @@ class OngoingActivityView extends StatelessWidget {
                         : () {
                             context.read<OngoingActivityBloc>().add(
                                 state.isPaused ? StopEvent() : PauseEvent());
-                            if (state.isPaused) {
-                              // TODO : handle navigation better
-                              // TODO : push replacement to statistics page
-                              // cannot push as is since activity does not have a stop date
-                              Navigator.of(context).pop();
-                            }
+                            // Navigation is handled by the bloc listener
                           },
                     child: Icon(state.isPaused
                         ? Icons.stop_rounded
@@ -284,6 +283,18 @@ class OngoingActivityView extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<OngoingActivityBloc, OngoingActivityState>(
+      listener: (context, state) {
+        if (state is OngoingActivityDone) {
+          navigateToReplacement(RouteName.pastActivity, state.activity);
+        }
+      },
+      child: _getUI(context),
     );
   }
 }

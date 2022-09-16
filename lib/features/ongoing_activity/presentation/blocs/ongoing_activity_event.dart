@@ -7,13 +7,6 @@ abstract class OngoingActivityEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LocationLoaded extends OngoingActivityEvent {
-  final Position position;
-
-  const LocationLoaded({required this.position});
-  List<Object> get props => [position];
-}
-
 class SettingsLoaded extends OngoingActivityEvent {
   final Settings settings;
 
