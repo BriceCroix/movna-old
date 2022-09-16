@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -25,13 +27,61 @@ class PastActivityPage extends StatelessWidget {
 }
 
 class PastActivityView extends StatelessWidget {
-  const PastActivityView({Key? key, required Activity activity})
+  PastActivityView({Key? key, required Activity activity})
       : _activity = activity,
         super(key: key);
   final Activity _activity;
 
+  final _mapController = MapController();
+
+  /// The ratio of the screen height taken by the map
+  static const double _mapRatio = 0.75;
+
   Color _getUserColor(BuildContext context) =>
       Theme.of(context).colorScheme.secondary;
+
+  /// Computes adequate zoom level according to extremum coordinates to show.
+  /// a [paddingFactor] above 1.0 allows not to have the extremum points on the border of the map, a typical value is 1.2.
+  double _getZoom(BuildContext context, double minLatitude, double maxLatitude,
+      double minLongitude, double maxLongitude, double paddingFactor) {
+    // Explanation about zoom values
+    // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Zoom_levels
+    // https://wiki.openstreetmap.org/wiki/Zoom_levels
+
+    // A huge thanks to Igor Brejc who gave their method at :
+    // https://gis.stackexchange.com/questions/19632/how-to-calculate-the-optimal-zoom-level-to-display-two-or-more-points-on-a-map
+
+    double mapWidth = MediaQuery.of(context).size.width;
+    double mapHeight = MediaQuery.of(context).size.height * _mapRatio;
+
+    double ry1 = math.log((math.sin(minLatitude * math.pi / 180) + 1) /
+        math.cos(minLatitude * math.pi / 180));
+    double ry2 = math.log((math.sin(maxLatitude * math.pi / 180) + 1) /
+        math.cos(maxLatitude * math.pi / 180));
+    double ryc = (ry1 + ry2) / 2;
+    double sinhRyc = (math.exp(ryc) - math.exp(-ryc)) / 2;
+    double centerY = math.atan(sinhRyc) * 180 / math.pi;
+
+    double resolutionHorizontal = (maxLongitude - minLongitude) / mapWidth;
+
+    double vy0 = math.log(math.tan(math.pi * (0.25 + centerY / 360)));
+    double vy1 = math.log(math.tan(math.pi * (0.25 + maxLatitude / 360)));
+    double viewHeightHalf = mapHeight / 2;
+    double zoomFactorPowered =
+        viewHeightHalf / (40.7436654315252 * (vy1 - vy0));
+    double resolutionVertical = 360.0 / (zoomFactorPowered * 256);
+
+    double resolution =
+        math.max(resolutionHorizontal, resolutionVertical) * paddingFactor;
+    late double zoom;
+    if(resolution > 0) {
+      zoom = math.log(360 / (resolution * 256)) / math.log(2);
+    }else{
+      zoom = 20;
+    }
+
+    return zoom;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +90,9 @@ class PastActivityView extends StatelessWidget {
     for (TrackPoint t in _activity.trackPoints) {
       if (t.position != null) {
         points.add(LatLng(
-            t.position!.latitudeInDegrees, t.position!.longitudeInDegrees));
+          t.position!.latitudeInDegrees,
+          t.position!.longitudeInDegrees,
+        ));
       }
     }
 
@@ -66,10 +118,10 @@ class PastActivityView extends StatelessWidget {
       ));
     }
     // Find bounds of map
-    double minLatitude = double.infinity;
-    double minLongitude = double.infinity;
-    double maxLatitude = double.negativeInfinity;
-    double maxLongitude = double.negativeInfinity;
+    double minLatitude = points.isNotEmpty ? double.infinity : 0;
+    double minLongitude = points.isNotEmpty ? double.infinity : 0;
+    double maxLatitude = points.isNotEmpty ? double.negativeInfinity : 0;
+    double maxLongitude = points.isNotEmpty ? double.negativeInfinity : 0;
     for (LatLng p in points) {
       if (p.latitude < minLatitude) {
         minLatitude = p.latitude;
@@ -84,8 +136,14 @@ class PastActivityView extends StatelessWidget {
         maxLongitude = p.longitude;
       }
     }
+    LatLng center = LatLng(
+        (maxLatitude + minLatitude) / 2, (maxLongitude + minLongitude) / 2);
+    double zoom = _getZoom(
+        context, minLatitude, maxLatitude, minLongitude, maxLongitude, 1.2);
+
+    /// The padding to use for the activity data under the map
     const double dataColumnPadding = 10;
-    // TODO put map boundaries according to min and max coordinates
+
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text(AppLocalizations.of(context)!.activity)),
@@ -94,15 +152,16 @@ class PastActivityView extends StatelessWidget {
       body: ListView(
         children: [
           SizedBox(
-            height: MediaQuery.of(context).size.height * 3 / 4,
+            height: MediaQuery.of(context).size.height * _mapRatio,
             child: FlutterMap(
-              mapController: MapController(),
+              mapController: _mapController,
               options: MapOptions(
-                zoom: 16.0,
+                // See this for zoom to scale : https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Zoom_levels
+                zoom: zoom,
                 maxZoom: 18.0,
                 minZoom: 6.0,
                 interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                center: (points.isNotEmpty) ? points.first : LatLng(0, 0),
+                center: center,
                 //bounds: LatLngBounds(LatLng(minLatitude, minLongitude),
                 //    LatLng(maxLatitude, maxLongitude)),
               ),
@@ -120,7 +179,7 @@ class PastActivityView extends StatelessWidget {
                 ),
                 BlocBuilder<PastActivityBloc, PastActivityState>(
                   builder: (context, state) {
-                    List<Marker> markersWithUser = markers;
+                    List<Marker> markersWithUser = List.from(markers);
                     if (state is PastActivityLoaded) {
                       markersWithUser.add(Marker(
                         point: LatLng(state.position.latitudeInDegrees,
