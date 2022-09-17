@@ -42,6 +42,98 @@ class OngoingActivityView extends StatelessWidget {
   Color _getUserColor(BuildContext context) =>
       Theme.of(context).colorScheme.secondary;
 
+  Widget _buildLockButton(BuildContext context, bool isLocked) {
+    return FloatingActionButton(
+      heroTag: 'lock',
+      key: UniqueKey(),
+      backgroundColor: Colors.blue,
+      onPressed: () => context
+          .read<OngoingActivityBloc>()
+          .add(isLocked ? UnlockEvent() : LockEvent()),
+      child: Icon(
+        isLocked ? Icons.lock_rounded : Icons.lock_open_rounded,
+      ),
+    );
+  }
+
+  Widget _buildPauseButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'pause',
+      backgroundColor: Colors.amber,
+      onPressed: () => context.read<OngoingActivityBloc>().add(PauseEvent()),
+      child: const Icon(Icons.pause_rounded),
+    );
+  }
+
+  Widget _buildStopButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'stop',
+      key: UniqueKey(),
+      backgroundColor: Colors.red,
+      onPressed: () => context.read<OngoingActivityBloc>().add(StopEvent()),
+      // Navigation is handled by the bloc listener
+      child: const Icon(Icons.stop_rounded),
+    );
+  }
+
+  Widget _buildResumeButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'resume',
+      key: UniqueKey(),
+      backgroundColor: Colors.lightGreen,
+      onPressed: () => context.read<OngoingActivityBloc>().add(ResumeEvent()),
+      child: const Icon(Icons.play_arrow_rounded),
+    );
+  }
+
+  Widget _buildSettingsButton(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'settings',
+      key: UniqueKey(),
+      backgroundColor: Colors.grey,
+      onPressed: () {},
+      //TODO
+      child: const Icon(Icons.settings),
+    );
+  }
+
+  Widget _buildButtons(BuildContext context, bool isLocked, bool isPaused) {
+    const double padding = 8;
+    if (isLocked) {
+      return _buildLockButton(context, isLocked);
+    } else {
+      if (isPaused) {
+        return Column(
+            key: UniqueKey(),
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildSettingsButton(context),
+              const SizedBox(height: padding),
+              _buildStopButton(context),
+              const SizedBox(height: padding),
+              _buildResumeButton(context),
+              const SizedBox(height: padding),
+              _buildLockButton(context, isLocked),
+            ]);
+      } else {
+        return Column(
+            key: UniqueKey(),
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _buildSettingsButton(context),
+              const SizedBox(height: padding),
+              _buildPauseButton(context),
+              const SizedBox(height: padding),
+              _buildLockButton(context, isLocked),
+            ]);
+      }
+    }
+  }
+
   Widget _getUI(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -225,67 +317,35 @@ class OngoingActivityView extends StatelessWidget {
             ),
           ],
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         floatingActionButton:
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
+          buildWhen: (previous, current) =>
+              previous is OngoingActivityLoaded &&
+              current is OngoingActivityLoaded &&
+              (previous.isLocked != current.isLocked ||
+                  (!previous.isLocked &&
+                      !current.isLocked &&
+                      previous.isPaused != current.isPaused)),
           builder: (context, state) {
-            if (state is OngoingActivityLoaded) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // TODO : hide all buttons but lock with Flow
-                  /// Settings button
-                  FloatingActionButton(
-                    heroTag: 'settings',
-                    backgroundColor:
-                        state.isLocked ? Colors.grey : Colors.grey[400],
-                    onPressed: state.isLocked ? null : () {},
-                    child: const Icon(Icons.settings),
-                  ),
-                  const SizedBox(height: 8),
-
-                  /// Pause or stop button depending on whether is paused or not
-                  FloatingActionButton(
-                    heroTag: 'pause_stop',
-                    backgroundColor: state.isLocked
-                        ? Colors.grey
-                        : (state.isPaused ? Colors.red : Colors.amber),
-                    onPressed: state.isLocked
-                        ? null
-                        : () {
-                            context.read<OngoingActivityBloc>().add(
-                                state.isPaused ? StopEvent() : PauseEvent());
-                            // Navigation is handled by the bloc listener
-                          },
-                    child: Icon(state.isPaused
-                        ? Icons.stop_rounded
-                        : Icons.pause_rounded),
-                  ),
-                  const SizedBox(height: 8),
-
-                  /// Lock, Unlock or resume button depending on whether is paused or not
-                  //TODO redo all these buttons, separate pause, stop etc and show with Flow
-                  FloatingActionButton(
-                    heroTag: 'lock_resume',
-                    backgroundColor:
-                        state.isPaused ? Colors.lightGreen : Colors.blue,
-                    onPressed: () => context.read<OngoingActivityBloc>().add(
-                        state.isLocked
-                            ? UnlockEvent()
-                            : (state.isPaused ? ResumeEvent() : LockEvent())),
-                    child: Icon(
-                      state.isLocked
-                          ? Icons.lock_rounded
-                          : (state.isPaused
-                              ? Icons.play_arrow_rounded
-                              : Icons.lock_open_rounded),
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return const SizedBox();
-            }
+            return AnimatedSwitcher(
+              layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+                return Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: <Widget>[
+                    ...previousChildren,
+                    if (currentChild != null) currentChild,
+                  ],
+                );
+              },
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: state is OngoingActivityLoaded
+                  ? _buildButtons(context, state.isLocked, state.isPaused)
+                  : const SizedBox(),
+            );
           },
         ),
       ),
@@ -301,7 +361,9 @@ class OngoingActivityView extends StatelessWidget {
           navigateToReplacement(RouteName.pastActivity, state.activity);
         } else if (state is OngoingActivityLoaded) {
           // Handle auto center map movements if not in pause
-          if (state.isMapReady && !state.isPaused && state.lastTrackPoint.position != null) {
+          if (state.isMapReady &&
+              !state.isPaused &&
+              state.lastTrackPoint.position != null) {
             LatLng center = LatLng(
               state.lastTrackPoint.position!.latitudeInDegrees,
               state.lastTrackPoint.position!.longitudeInDegrees,
