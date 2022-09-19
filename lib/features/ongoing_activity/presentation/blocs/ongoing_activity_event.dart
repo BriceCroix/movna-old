@@ -35,9 +35,9 @@ class TimeIntervalElapsedEvent extends OngoingActivityEvent {
   List<Object> get props => [duration];
 }
 
-class PositionChangedEvent extends OngoingActivityEvent {
-  final Position position;
+class NewTrackPointEvent extends OngoingActivityEvent {
+  final TrackPoint trackPoint;
 
-  const PositionChangedEvent({required this.position});
-  List<Object> get props => [position];
+  const NewTrackPointEvent({required this.trackPoint});
+  List<Object> get props => [trackPoint];
 }

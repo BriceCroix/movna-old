@@ -12,26 +12,26 @@ class OngoingActivityInitial extends OngoingActivityState {
 }
 
 class OngoingActivityLoading extends OngoingActivityState {
-  const OngoingActivityLoading({this.settings, this.position});
+  const OngoingActivityLoading({this.settings, this.trackPoint});
 
   /// Settings of the app.
   final Settings? settings;
 
-  /// Current Location
-  final Position? position;
+  /// Current TrackPoint
+  final TrackPoint? trackPoint;
 
   OngoingActivityLoading copyWith({
     Settings? settings,
-    Position? position,
+    TrackPoint? trackPoint,
   }) {
     return OngoingActivityLoading(
       settings: settings ?? this.settings,
-      position: position ?? this.position,
+      trackPoint: trackPoint ?? this.trackPoint,
     );
   }
 
   @override
-  List<Object?> get props => [settings, position];
+  List<Object?> get props => [settings, trackPoint];
 }
 
 class OngoingActivityLoaded extends OngoingActivityState {

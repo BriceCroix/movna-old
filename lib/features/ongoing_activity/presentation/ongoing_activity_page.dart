@@ -39,6 +39,8 @@ class OngoingActivityView extends StatelessWidget {
     return false;
   }
 
+  static const Color _pauseColor = Colors.amberAccent;
+
   Color _getUserColor(BuildContext context) =>
       Theme.of(context).colorScheme.secondary;
 
@@ -59,7 +61,7 @@ class OngoingActivityView extends StatelessWidget {
   Widget _buildPauseButton(BuildContext context) {
     return FloatingActionButton(
       heroTag: 'pause',
-      backgroundColor: Colors.amber,
+      backgroundColor: _pauseColor,
       onPressed: () => context.read<OngoingActivityBloc>().add(PauseEvent()),
       child: const Icon(Icons.pause_rounded),
     );
@@ -262,6 +264,7 @@ class OngoingActivityView extends StatelessWidget {
                     } else if (state is OngoingActivityDone) {
                       activity = state.activity;
                     }
+                    bool isPaused = (state is OngoingActivityLoaded) ? state.isPaused : false;
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -273,9 +276,10 @@ class OngoingActivityView extends StatelessWidget {
                               .split('.')
                               .first
                               .padLeft(8, '0'),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 70,
                             fontWeight: FontWeight.bold,
+                            color: isPaused ? _pauseColor : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 8.0),
@@ -321,12 +325,14 @@ class OngoingActivityView extends StatelessWidget {
         floatingActionButton:
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
           buildWhen: (previous, current) =>
-              previous is OngoingActivityLoaded &&
+          (previous is! OngoingActivityLoaded &&
+              current is OngoingActivityLoaded) ||
+              (previous is OngoingActivityLoaded &&
               current is OngoingActivityLoaded &&
               (previous.isLocked != current.isLocked ||
                   (!previous.isLocked &&
                       !current.isLocked &&
-                      previous.isPaused != current.isPaused)),
+                      previous.isPaused != current.isPaused))),
           builder: (context, state) {
             return AnimatedSwitcher(
               layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {

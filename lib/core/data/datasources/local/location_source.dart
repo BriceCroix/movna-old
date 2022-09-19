@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 abstract class LocationSource {
   Future<geolocator.Position> getLocation();
+
   Future<Stream<geolocator.Position>> getLocationStream();
 }
 
@@ -15,6 +16,12 @@ class LocationSourceImpl extends LocationSource {
 
   @override
   Future<Stream<geolocator.Position>> getLocationStream() async {
-    return geolocator.Geolocator.getPositionStream();
+    return geolocator.Geolocator.getPositionStream(
+      locationSettings: const geolocator.LocationSettings(
+          // Set to best available accuracy.
+          accuracy: geolocator.LocationAccuracy.bestForNavigation,
+          // Distance filter of 2 meters between each position.
+          distanceFilter: 2),
+    );
   }
 }

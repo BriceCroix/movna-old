@@ -4,15 +4,14 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/domain/entities/activity.dart';
-import 'package:movna/core/domain/entities/position.dart';
 import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
-import 'package:movna/core/domain/usecases/get_position.dart';
-import 'package:movna/core/domain/usecases/get_position_stream.dart';
 import 'package:movna/core/domain/usecases/get_settings.dart';
 import 'package:movna/core/domain/usecases/save_activity.dart';
 import 'package:movna/core/domain/usecases/save_settings.dart';
 import 'package:movna/features/ongoing_activity/data/models/chronometer.dart';
+import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point.dart';
+import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point_stream.dart';
 
 part 'ongoing_activity_event.dart';
 
@@ -24,14 +23,14 @@ class OngoingActivityBloc
   final SaveActivity _saveActivity;
   final GetSettings _getSettings;
   final SaveSettings _saveSettings;
-  final GetPosition _getPosition;
-  final GetPositionStream _getPositionStream;
+  final GetTrackPoint _getTrackPoint;
+  final GetTrackPointStream _getTrackPointStream;
 
   /// Stream yielding activity duration.
   StreamSubscription<Duration>? _durationSubscription;
 
-  /// Stream yielding user positions.
-  StreamSubscription<Position>? _positionSubscription;
+  /// Stream yielding user trackpoints.
+  StreamSubscription<TrackPoint>? _trackPointSubscription;
 
   /// Countdown timer, automatic lock pushed when duration is out.
   Timer? _automaticLockTimer;
@@ -43,8 +42,8 @@ class OngoingActivityBloc
     this._saveActivity,
     this._getSettings,
     this._saveSettings,
-    this._getPosition,
-    this._getPositionStream,
+    this._getTrackPoint,
+    this._getTrackPointStream,
   ) : super(const OngoingActivityInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
     on<MapReadyEvent>(_onMapReadyEvent);
@@ -54,21 +53,21 @@ class OngoingActivityBloc
     on<LockEvent>(_onLockEvent);
     on<UnlockEvent>(_onUnlockEvent);
     on<StartEvent>(_onStartEvent);
-    on<PositionChangedEvent>(_onPositionChangedEvent);
+    on<NewTrackPointEvent>(_onNewTrackPointEvent);
     on<TimeIntervalElapsedEvent>(_onTimeIntervalElapsedEvent);
 
     _getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
-    _getPosition().then((position) => add(PositionChangedEvent(position: position)));
+    _getTrackPoint().then((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
 
-    _getPositionStream().then((stream) {
-      _positionSubscription =
-          stream.listen((event) => add(PositionChangedEvent(position: event)));
+    _getTrackPointStream().then((stream) {
+      _trackPointSubscription =
+          stream.listen((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
     });
   }
 
   @override
   Future<void> close() {
-    _positionSubscription?.cancel();
+    _trackPointSubscription?.cancel();
     _durationSubscription?.cancel();
     return super.close();
   }
@@ -109,7 +108,7 @@ class OngoingActivityBloc
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       _durationSubscription?.cancel();
-      _positionSubscription?.cancel();
+      _trackPointSubscription?.cancel();
       // Save activity with accurate stopDate
       Activity activityDone =
           stateLoaded.activity.copyWith(stopTime: DateTime.now());
@@ -151,22 +150,17 @@ class OngoingActivityBloc
       _durationSubscription?.cancel();
       _durationSubscription = Chronometer(value: Duration.zero).tick().listen(
           (duration) => add(TimeIntervalElapsedEvent(duration: duration)));
-      DateTime now = DateTime.now();
-      TrackPoint trackpoint = TrackPoint(
-        dateTime: now,
-        position: stateLoading.position!,
-      );
       emit(
         OngoingActivityLoaded(
           settings: stateLoading.settings!,
           activity: Activity(
-              startTime: now,
+              startTime: stateLoading.trackPoint!.dateTime!,
               stopTime: DateTime(0),
               sport: stateLoading.settings!.sport,
-              trackPoints: <TrackPoint>[trackpoint]),
+              trackPoints: <TrackPoint>[stateLoading.trackPoint!]),
           isLocked: true,
           isPaused: false,
-          lastTrackPoint: trackpoint,
+          lastTrackPoint: stateLoading.trackPoint!,
         ),
       );
       _resetAutomaticPauseTimer();
@@ -185,42 +179,39 @@ class OngoingActivityBloc
     }
   }
 
-  void _onPositionChangedEvent(
-      PositionChangedEvent event, Emitter<OngoingActivityState> emit) {
+  void _onNewTrackPointEvent(
+      NewTrackPointEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityInitial) {
-      emit(OngoingActivityLoading(position: event.position));
+      emit(OngoingActivityLoading(trackPoint: event.trackPoint));
     } else if (state is OngoingActivityLoading) {
       OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
-      emit(stateLoading.copyWith(position: event.position));
+      emit(stateLoading.copyWith(trackPoint: event.trackPoint));
       add(StartEvent());
       // If more than two fields to load in the future, add an if to check
       // that all fields are loaded before adding start event
     } else if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
 
-      // Create new trackpoint
-      TrackPoint newTrackpoint = TrackPoint(
-        position: event.position,
-        dateTime: DateTime.now(),
-      );
-
-      // Update speed value
-      double? speedInKmPerHour = newTrackpoint
-          .speedInKilometersPerHourFrom(stateLoaded.lastTrackPoint);
-      newTrackpoint = newTrackpoint.copyWith(
-        speedInKilometersPerHour: speedInKmPerHour,
-      );
+      TrackPoint newTrackPoint = event.trackPoint;
+      if(newTrackPoint.speedInKilometersPerHour == null) {
+        // Update speed value if missing
+        double? speedInKmPerHour = newTrackPoint
+            .speedInKilometersPerHourFrom(stateLoaded.lastTrackPoint);
+        newTrackPoint = newTrackPoint.copyWith(
+          speedInKilometersPerHour: speedInKmPerHour,
+        );
+      }
 
       // Only update activity if not paused
       late Activity newActivity;
       if (!stateLoaded.isPaused) {
         // Compute distance
-        double lastDistance = newTrackpoint.position!
+        double lastDistance = newTrackPoint.position!
             .distanceInMetersFrom(stateLoaded.lastTrackPoint.position!);
         double totalDistance =
             stateLoaded.activity.distanceInMeters + lastDistance;
         newActivity = stateLoaded.activity.copyWith(
-          trackPoints: [...stateLoaded.activity.trackPoints, newTrackpoint],
+          trackPoints: [...stateLoaded.activity.trackPoints, newTrackPoint],
           distanceInMeters: totalDistance,
         );
       } else {
@@ -229,8 +220,8 @@ class OngoingActivityBloc
 
       // Handle automatic pause if activated
       late bool newIsPaused;
-      if (stateLoaded.settings.automaticPause && speedInKmPerHour != null) {
-        newIsPaused = speedInKmPerHour <
+      if (stateLoaded.settings.automaticPause && newTrackPoint.speedInKilometersPerHour != null) {
+        newIsPaused = newTrackPoint.speedInKilometersPerHour! <
             stateLoaded
                 .settings.automaticPauseThresholdSpeedInKilometersPerHour;
         if (newIsPaused && !stateLoaded.isPaused) {
@@ -248,7 +239,7 @@ class OngoingActivityBloc
       // Finally emit state
       emit(stateLoaded.copyWith(
         activity: newActivity,
-        lastTrackPoint: newTrackpoint,
+        lastTrackPoint: newTrackPoint,
         isPaused: newIsPaused,
       ));
     }

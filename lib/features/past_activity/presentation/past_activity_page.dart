@@ -162,8 +162,6 @@ class PastActivityView extends StatelessWidget {
                 minZoom: 6.0,
                 interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                 center: center,
-                //bounds: LatLngBounds(LatLng(minLatitude, minLongitude),
-                //    LatLng(maxLatitude, maxLongitude)),
               ),
               children: [
                 getOpenStreetMapTileLayer(),
