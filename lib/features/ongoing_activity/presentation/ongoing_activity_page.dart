@@ -6,11 +6,10 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/domain/entities/activity.dart';
-import 'package:movna/core/domain/entities/position.dart';
-import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
-import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
+import 'package:movna/core/presentation/widgets/colors.dart';
+import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -40,16 +39,11 @@ class OngoingActivityView extends StatelessWidget {
     return false;
   }
 
-  static const Color _pauseColor = Colors.amberAccent;
-
-  Color _getUserColor(BuildContext context) =>
-      Theme.of(context).colorScheme.secondary;
-
   Widget _buildLockButton(BuildContext context, bool isLocked) {
     return FloatingActionButton(
       heroTag: 'lock',
       key: UniqueKey(),
-      backgroundColor: Colors.blue,
+      backgroundColor: userPositionColor,
       onPressed: () => context
           .read<OngoingActivityBloc>()
           .add(isLocked ? UnlockEvent() : LockEvent()),
@@ -62,7 +56,7 @@ class OngoingActivityView extends StatelessWidget {
   Widget _buildPauseButton(BuildContext context) {
     return FloatingActionButton(
       heroTag: 'pause',
-      backgroundColor: _pauseColor,
+      backgroundColor: pauseColor,
       onPressed: () => context.read<OngoingActivityBloc>().add(PauseEvent()),
       child: const Icon(Icons.pause_rounded),
     );
@@ -72,7 +66,7 @@ class OngoingActivityView extends StatelessWidget {
     return FloatingActionButton(
       heroTag: 'stop',
       key: UniqueKey(),
-      backgroundColor: Colors.red,
+      backgroundColor: stopColor,
       onPressed: () => context.read<OngoingActivityBloc>().add(StopEvent()),
       // Navigation is handled by the bloc listener
       child: const Icon(Icons.stop_rounded),
@@ -83,7 +77,7 @@ class OngoingActivityView extends StatelessWidget {
     return FloatingActionButton(
       heroTag: 'resume',
       key: UniqueKey(),
-      backgroundColor: Colors.lightGreen,
+      backgroundColor: startColor,
       onPressed: () => context.read<OngoingActivityBloc>().add(ResumeEvent()),
       child: const Icon(Icons.play_arrow_rounded),
     );
@@ -144,10 +138,9 @@ class OngoingActivityView extends StatelessWidget {
         body: Stack(
           children: [
             BlocConsumer<OngoingActivityBloc, OngoingActivityState>(
-              listenWhen: (previous, current){
-                return current is OngoingActivityLoaded;
-              },
-                listener: (context, state) {
+                listenWhen: (previous, current) {
+              return current is OngoingActivityLoaded;
+            }, listener: (context, state) {
               if (state is OngoingActivityLoaded) {
                 // Handle auto center map movements if not in pause
                 if (state.isMapReady &&
@@ -186,7 +179,9 @@ class OngoingActivityView extends StatelessWidget {
                             : LatLng(0, 0),
                       ),
                       children: [
+                        // Tile Layer
                         getOpenStreetMapTileLayer(),
+                        // Polyline layer
                         BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                           buildWhen: (previous, current) =>
                               (current is OngoingActivityLoaded) &&
@@ -197,26 +192,12 @@ class OngoingActivityView extends StatelessWidget {
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
-                            List<LatLng> points = [];
-                            for (TrackPoint t
-                                in stateLoaded.activity.trackPoints) {
-                              if (t.position != null) {
-                                points.add(LatLng(t.position!.latitudeInDegrees,
-                                    t.position!.longitudeInDegrees));
-                              }
-                            }
-                            return PolylineLayer(
-                              polylineCulling: false,
-                              polylines: [
-                                Polyline(
-                                  points: points,
-                                  color: _getUserColor(context),
-                                  strokeWidth: 4,
-                                ),
-                              ],
-                            );
+
+                            return getActivityPolylineLayer(
+                                activity: stateLoaded.activity);
                           },
                         ),
+                        // Markers Layer
                         BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                           buildWhen: (previous, current) =>
                               (current is OngoingActivityLoaded) &&
@@ -226,37 +207,17 @@ class OngoingActivityView extends StatelessWidget {
                           builder: (context, state) {
                             OngoingActivityLoaded stateLoaded =
                                 (state as OngoingActivityLoaded);
-                            List<Marker> markers = [];
                             // Add starting point
-                            if (stateLoaded.activity.trackPoints.isNotEmpty &&
-                                stateLoaded
-                                        .activity.trackPoints.first.position !=
-                                    null) {
-                              Position start = stateLoaded
-                                  .activity.trackPoints.first.position!;
-                              markers.add(Marker(
-                                point: LatLng(start.latitudeInDegrees,
-                                    start.longitudeInDegrees),
-                                builder: (context) => const Icon(
-                                  Icons.circle_rounded,
-                                  color: Colors.green,
-                                ),
-                              ));
+                            if (stateLoaded.activity.trackPoints.isNotEmpty) {
+                              return getActivityMarkerLayer(
+                                start: stateLoaded
+                                    .activity.trackPoints.first.position,
+                                user: state.lastTrackPoint.position,
+                              );
+                            } else {
+                              return getActivityMarkerLayer(
+                                  user: state.lastTrackPoint.position);
                             }
-                            // Add current position
-                            Position? current =
-                                stateLoaded.lastTrackPoint.position;
-                            if (current != null) {
-                              markers.add(Marker(
-                                point: LatLng(current.latitudeInDegrees,
-                                    current.longitudeInDegrees),
-                                builder: (context) => Icon(
-                                  Icons.circle_rounded,
-                                  color: _getUserColor(context),
-                                ),
-                              ));
-                            }
-                            return MarkerLayer(markers: markers);
                           },
                         ),
                       ],
@@ -298,7 +259,7 @@ class OngoingActivityView extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 70,
                             fontWeight: FontWeight.bold,
-                            color: isPaused ? _pauseColor : Colors.black,
+                            color: isPaused ? pauseColor : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 8.0),

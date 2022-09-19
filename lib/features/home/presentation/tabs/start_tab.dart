@@ -7,7 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
-import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
+import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
 
 class StartTab extends StatelessWidget {
@@ -26,9 +26,6 @@ class StartTabView extends StatelessWidget {
   StartTabView({super.key});
 
   final MapController _mapController = MapController();
-
-  Color _getUserColor(BuildContext context) =>
-      Theme.of(context).colorScheme.secondary;
 
   Widget _buildStartBottomSheet(BuildContext context) {
     return BlocBuilder<StartTabBloc, StartTabState>(
@@ -126,24 +123,14 @@ class StartTabView extends StatelessWidget {
                         state.position.longitudeInDegrees),
                   ),
                   children: [
+                    // Tile layer
                     getOpenStreetMapTileLayer(),
+                    // Marker Layer
                     BlocBuilder<StartTabBloc, StartTabState>(
                       builder: (context, state) {
                         StartTabLoaded stateLoaded = (state as StartTabLoaded);
-                        return MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: LatLng(
-                                stateLoaded.position.latitudeInDegrees,
-                                stateLoaded.position.longitudeInDegrees,
-                              ),
-                              builder: (context) => Icon(
-                                Icons.circle_rounded,
-                                color: _getUserColor(context),
-                              ),
-                            ),
-                          ],
-                        );
+                        return getActivityMarkerLayer(
+                            user: stateLoaded.position);
                       },
                     ),
                   ],

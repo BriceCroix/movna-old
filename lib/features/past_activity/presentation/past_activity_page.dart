@@ -7,7 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
-import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
+import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/past_activity/presentation/blocs/past_activity_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -36,9 +36,6 @@ class PastActivityView extends StatelessWidget {
 
   /// The ratio of the screen height taken by the map
   static const double _mapRatio = 0.75;
-
-  Color _getUserColor(BuildContext context) =>
-      Theme.of(context).colorScheme.secondary;
 
   /// Computes adequate zoom level according to extremum coordinates to show.
   /// a [paddingFactor] above 1.0 allows not to have the extremum points on the border of the map, a typical value is 1.2.
@@ -74,9 +71,9 @@ class PastActivityView extends StatelessWidget {
     double resolution =
         math.max(resolutionHorizontal, resolutionVertical) * paddingFactor;
     late double zoom;
-    if(resolution > 0) {
+    if (resolution > 0) {
       zoom = math.log(360 / (resolution * 256)) / math.log(2);
-    }else{
+    } else {
       zoom = 20;
     }
 
@@ -85,55 +82,28 @@ class PastActivityView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Create list of points of activity for the map
-    List<LatLng> points = [];
+    // Find bounds of map
+    double minLatitude = _activity.trackPoints.isNotEmpty ? double.infinity : 0;
+    double minLongitude =
+        _activity.trackPoints.isNotEmpty ? double.infinity : 0;
+    double maxLatitude =
+        _activity.trackPoints.isNotEmpty ? double.negativeInfinity : 0;
+    double maxLongitude =
+        _activity.trackPoints.isNotEmpty ? double.negativeInfinity : 0;
     for (TrackPoint t in _activity.trackPoints) {
       if (t.position != null) {
-        points.add(LatLng(
-          t.position!.latitudeInDegrees,
-          t.position!.longitudeInDegrees,
-        ));
-      }
-    }
-
-    List<Marker> markers = [];
-    // Add starting point
-    if (points.isNotEmpty) {
-      markers.add(Marker(
-        point: points.first,
-        builder: (context) => const Icon(
-          Icons.circle_rounded,
-          color: Colors.green,
-        ),
-      ));
-    }
-    // Add ending point
-    if (points.isNotEmpty) {
-      markers.add(Marker(
-        point: points.last,
-        builder: (context) => const Icon(
-          Icons.circle_rounded,
-          color: Colors.red,
-        ),
-      ));
-    }
-    // Find bounds of map
-    double minLatitude = points.isNotEmpty ? double.infinity : 0;
-    double minLongitude = points.isNotEmpty ? double.infinity : 0;
-    double maxLatitude = points.isNotEmpty ? double.negativeInfinity : 0;
-    double maxLongitude = points.isNotEmpty ? double.negativeInfinity : 0;
-    for (LatLng p in points) {
-      if (p.latitude < minLatitude) {
-        minLatitude = p.latitude;
-      }
-      if (p.longitude < minLongitude) {
-        minLongitude = p.longitude;
-      }
-      if (p.latitude > maxLatitude) {
-        maxLatitude = p.latitude;
-      }
-      if (p.longitude > maxLongitude) {
-        maxLongitude = p.longitude;
+        if (t.position!.latitudeInDegrees < minLatitude) {
+          minLatitude = t.position!.latitudeInDegrees;
+        }
+        if (t.position!.longitudeInDegrees < minLongitude) {
+          minLongitude = t.position!.longitudeInDegrees;
+        }
+        if (t.position!.latitudeInDegrees > maxLatitude) {
+          maxLatitude = t.position!.latitudeInDegrees;
+        }
+        if (t.position!.longitudeInDegrees > maxLongitude) {
+          maxLongitude = t.position!.longitudeInDegrees;
+        }
       }
     }
     LatLng center = LatLng(
@@ -164,31 +134,28 @@ class PastActivityView extends StatelessWidget {
                 center: center,
               ),
               children: [
+                // Tile layer
                 getOpenStreetMapTileLayer(),
-                PolylineLayer(
-                  polylineCulling: false,
-                  polylines: [
-                    Polyline(
-                      points: points,
-                      color: _getUserColor(context),
-                      strokeWidth: 4,
-                    ),
-                  ],
-                ),
+                // Polyline layer
+                getActivityPolylineLayer(activity: _activity),
+                // Markers layer
                 BlocBuilder<PastActivityBloc, PastActivityState>(
                   builder: (context, state) {
-                    List<Marker> markersWithUser = List.from(markers);
-                    if (state is PastActivityLoaded) {
-                      markersWithUser.add(Marker(
-                        point: LatLng(state.position.latitudeInDegrees,
-                            state.position.longitudeInDegrees),
-                        builder: (context) => Icon(
-                          Icons.circle_rounded,
-                          color: _getUserColor(context),
-                        ),
-                      ));
+                    if (_activity.trackPoints.isNotEmpty) {
+                      return getActivityMarkerLayer(
+                        start: _activity.trackPoints.first.position,
+                        user: (state is PastActivityLoaded)
+                            ? state.position
+                            : null,
+                        stop: _activity.trackPoints.last.position,
+                      );
+                    } else {
+                      return getActivityMarkerLayer(
+                        user: (state is PastActivityLoaded)
+                            ? state.position
+                            : null,
+                      );
                     }
-                    return MarkerLayer(markers: markersWithUser);
                   },
                 ),
               ],
