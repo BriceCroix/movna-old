@@ -51,6 +51,8 @@ dependencies:
   geolocator: ^9.0.1
   flutter_map: ^3.0.0
   latlong2: ^0.8.1
+  #fl_chart: ^0.55.1
+  wakelock: ^0.6.2
 
 dev_dependencies:
   flutter_test:

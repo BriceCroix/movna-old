@@ -12,6 +12,7 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/movna_tile_layers.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
+import 'package:wakelock/wakelock.dart';
 
 import 'blocs/ongoing_activity_bloc.dart';
 
@@ -92,7 +93,7 @@ class OngoingActivityView extends StatelessWidget {
     return FloatingActionButton(
       heroTag: 'settings',
       key: UniqueKey(),
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.grey[500],
       onPressed: () {},
       //TODO
       child: const Icon(Icons.settings),
@@ -142,8 +143,24 @@ class OngoingActivityView extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
-                builder: (context, state) {
+            BlocConsumer<OngoingActivityBloc, OngoingActivityState>(
+              listenWhen: (previous, current){
+                return current is OngoingActivityLoaded;
+              },
+                listener: (context, state) {
+              if (state is OngoingActivityLoaded) {
+                // Handle auto center map movements if not in pause
+                if (state.isMapReady &&
+                    !state.isPaused &&
+                    state.lastTrackPoint.position != null) {
+                  LatLng center = LatLng(
+                    state.lastTrackPoint.position!.latitudeInDegrees,
+                    state.lastTrackPoint.position!.longitudeInDegrees,
+                  );
+                  bool res = _mapController.move(center, _mapController.zoom);
+                }
+              }
+            }, builder: (context, state) {
               return state is! OngoingActivityLoaded
                   ? SpinKitRotatingCircle(
                       color: Theme.of(context).colorScheme.secondary,
@@ -264,7 +281,9 @@ class OngoingActivityView extends StatelessWidget {
                     } else if (state is OngoingActivityDone) {
                       activity = state.activity;
                     }
-                    bool isPaused = (state is OngoingActivityLoaded) ? state.isPaused : false;
+                    bool isPaused = (state is OngoingActivityLoaded)
+                        ? state.isPaused
+                        : false;
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -325,17 +344,18 @@ class OngoingActivityView extends StatelessWidget {
         floatingActionButton:
             BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
           buildWhen: (previous, current) =>
-          (previous is! OngoingActivityLoaded &&
-              current is OngoingActivityLoaded) ||
+              (previous is! OngoingActivityLoaded &&
+                  current is OngoingActivityLoaded) ||
               (previous is OngoingActivityLoaded &&
-              current is OngoingActivityLoaded &&
-              (previous.isLocked != current.isLocked ||
-                  (!previous.isLocked &&
-                      !current.isLocked &&
-                      previous.isPaused != current.isPaused))),
+                  current is OngoingActivityLoaded &&
+                  (previous.isLocked != current.isLocked ||
+                      (!previous.isLocked &&
+                          !current.isLocked &&
+                          previous.isPaused != current.isPaused))),
           builder: (context, state) {
             return AnimatedSwitcher(
-              layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+              layoutBuilder:
+                  (Widget? currentChild, List<Widget> previousChildren) {
                 return Stack(
                   alignment: Alignment.bottomCenter,
                   children: <Widget>[
@@ -362,20 +382,15 @@ class OngoingActivityView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<OngoingActivityBloc, OngoingActivityState>(
       listener: (context, state) {
-        // Handle navigation at the end of the activity
         if (state is OngoingActivityDone) {
+          // Handle screen power
+          Wakelock.disable();
+          _mapController.dispose();
+          // Handle navigation at the end of the activity
           navigateToReplacement(RouteName.pastActivity, state.activity);
         } else if (state is OngoingActivityLoaded) {
-          // Handle auto center map movements if not in pause
-          if (state.isMapReady &&
-              !state.isPaused &&
-              state.lastTrackPoint.position != null) {
-            LatLng center = LatLng(
-              state.lastTrackPoint.position!.latitudeInDegrees,
-              state.lastTrackPoint.position!.longitudeInDegrees,
-            );
-            bool res = _mapController.move(center, _mapController.zoom);
-          }
+          // Handle screen power (always-on)
+          Wakelock.enable();
         }
       },
       child: _getUI(context),
