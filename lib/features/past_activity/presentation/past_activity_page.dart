@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/past_activity/presentation/blocs/past_activity_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -169,8 +170,7 @@ class PastActivityView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(AppLocalizations.of(context)!.sport),
-                    //TODO : translate sport
-                    Text(_activity.sport.name),
+                    Text(translateSport(_activity.sport, context)),
                   ],
                 ),
                 const SizedBox(height: dataColumnPadding),

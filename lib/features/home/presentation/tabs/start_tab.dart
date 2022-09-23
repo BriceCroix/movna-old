@@ -7,6 +7,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
+import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
 
@@ -52,8 +53,7 @@ class StartTabView extends StatelessWidget {
                         .map<DropdownMenuItem<Sport>>((Sport value) {
                       return DropdownMenuItem<Sport>(
                         value: value,
-                        //TODO : translate name
-                        child: Text(value.name),
+                        child: Text(translateSport(value, context)),
                       );
                     }).toList(),
                   )
