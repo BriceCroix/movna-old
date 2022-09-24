@@ -54,5 +54,11 @@
     "sportScooter": "Scooter",
     "sportSkateboarding": "Skateboarding",
     "sportRollerblading": "Rollerblading",
-    "sportHorseRiding": "Horse Riding"
+    "sportHorseRiding": "Horse Riding",
+
+    "myProfile": "My profile",
+    "myItineraries": "My itineraries",
+    "myGear": "My gear",
+
+    "settings": "Settings"
 }

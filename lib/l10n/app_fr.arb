@@ -51,5 +51,11 @@
     "sportScooter": "Trottinette",
     "sportSkateboarding": "Skateboard",
     "sportRollerblading": "Rollers",
-    "sportHorseRiding": "Cheval"
+    "sportHorseRiding": "Cheval",
+
+    "myProfile": "Mon profil",
+    "myItineraries": "Mes itinéraires",
+    "myGear": "Mon équipement",
+
+    "settings": "Paramètres"
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/features/home/presentation/tabs/history_tab.dart';
+import 'package:movna/features/home/presentation/tabs/profile_tab.dart';
 import 'package:movna/features/home/presentation/tabs/start_tab.dart';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +16,7 @@ class _HomePageState extends State<HomePage>{
   int _selectedIndex = 1;
 
   static const List<Widget> _pages = <Widget>[
-    Text('1'),
+    ProfileTab(),
     StartTab(),
     HistoryTab(),
   ];
