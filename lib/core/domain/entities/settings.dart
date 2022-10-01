@@ -14,8 +14,8 @@ class Settings with _$Settings {
     required Sport sport,
     // /// Is the vocal coach enabled.
     // @Default(false) bool vocalCoach,
-    /// The map to be showed on screen on all pages.
-    required MapTileLayer mapTileLayer,
+    // /// The map to be showed on screen on all pages.
+    // required MapTileLayer mapTileLayer,
 
     // User profile ------------------------------------------------------------
     /// Name of user.

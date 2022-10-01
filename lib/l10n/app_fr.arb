@@ -57,5 +57,23 @@
     "myItineraries": "Mes itinéraires",
     "myGear": "Mon équipement",
 
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+
+    "loading": "Chargement",
+
+    "userName": "Nom",
+    "userHeight": "Taille (m)",
+    "userWeight": "Poids (kg)",
+    "userGender": "Genre",
+
+    "genderMale": "Masculin",
+    "genderFemale": "Féminin",
+    "genderUndefined": "Non défini",
+
+    "itinerariesCountText": "{count} itinéraires enregistrés",
+    "gearCountText": "{count} équipements enregistrés",
+
+    "automaticPauseThreshold": "Seuil de pause auto (km/h)",
+    "automaticPauseDurationWithoutMovement": "Temps seuil pause auto (s)",
+    "automaticLockDuration": "Temps seuil verrouillage auto (s)"
 }

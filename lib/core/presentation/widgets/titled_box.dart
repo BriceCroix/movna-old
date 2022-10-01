@@ -16,6 +16,7 @@ class TitledBox extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

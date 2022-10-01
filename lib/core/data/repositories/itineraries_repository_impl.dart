@@ -40,4 +40,17 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
       return true;
     }
   }
+
+  @override
+  Future<int> getItinerariesCount() async {
+    try {
+      int count = await dataBaseSource.getItinerariesCount();
+
+      return count;
+    } catch (e) {
+      Logger logger = Logger();
+      logger.e(e);
+      return -1;
+    }
+  }
 }

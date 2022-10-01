@@ -7,4 +7,7 @@ abstract class ItinerariesRepository {
 
   /// Get all itineraries stored on disk, with a maximum of [maxCount] elements.
   Future<List<Itinerary>> getItineraries([int? maxCount]);
+
+  /// Get number of itineraries stored on disk.
+  Future<int> getItinerariesCount();
 }

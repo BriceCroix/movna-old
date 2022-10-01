@@ -9,7 +9,7 @@ import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
-import 'package:movna/features/home/presentation/start_tab_bloc/start_tab_bloc.dart';
+import 'package:movna/features/home/presentation/bloc/start_tab_bloc.dart';
 
 class StartTab extends StatelessWidget {
   const StartTab({super.key});
@@ -18,13 +18,13 @@ class StartTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => injector<StartTabBloc>(),
-      child: StartTabView(),
+      child: _StartTabView(),
     );
   }
 }
 
-class StartTabView extends StatelessWidget {
-  StartTabView({super.key});
+class _StartTabView extends StatelessWidget {
+  _StartTabView();
 
   final MapController _mapController = MapController();
 

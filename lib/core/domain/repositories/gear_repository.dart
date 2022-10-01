@@ -7,4 +7,7 @@ abstract class GearRepository {
 
   /// Get all pieces of gear stored on disk, with a maximum of [maxCount] elements.
   Future<List<Gear>> getGear([int? maxCount]);
+
+  /// Get number of gear pieces stored on disk.
+  Future<int> getGearCount();
 }

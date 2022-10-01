@@ -12,7 +12,6 @@ import 'package:movna/core/domain/usecases/get_settings.dart';
 import 'package:movna/core/domain/usecases/save_settings.dart';
 
 part 'start_tab_event.dart';
-
 part 'start_tab_state.dart';
 
 @injectable
@@ -41,6 +40,7 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
 
     getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
     getPosition().then((position) => add(LocationLoaded(position: position)));
+    // TODO cancel these requests in close.
 
     getPositionStream().then((stream) {
       _positionSubscription =

@@ -39,4 +39,17 @@ class GearRepositoryImpl implements GearRepository {
       return true;
     }
   }
+
+  @override
+  Future<int> getGearCount() async {
+    try {
+      int count = await dataBaseSource.getGearCount();
+
+      return count;
+    } catch (e) {
+      Logger logger = Logger();
+      logger.e(e);
+      return -1;
+    }
+  }
 }

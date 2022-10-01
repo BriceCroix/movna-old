@@ -48,11 +48,7 @@ class DataBaseSource {
     final isar = await _openIsar();
 
     Future<List<GearModel>> res = maxCount != null
-        ? isar.gearModels
-        .where()
-        .sortByName()
-        .limit(maxCount)
-        .findAll()
+        ? isar.gearModels.where().sortByName().limit(maxCount).findAll()
         : isar.gearModels.where().sortByName().findAll();
 
     isar.close();
@@ -68,16 +64,20 @@ class DataBaseSource {
     isar.close();
   }
 
+  /// Returns number of gear models in database.
+  Future<int> getGearCount() async {
+    final isar = await _openIsar();
+    int count = await isar.gearModels.where().count();
+    isar.close();
+    return count;
+  }
+
   /// Returns itinerary models sorted by name.
   Future<List<ItineraryModel>> getItineraries([int? maxCount]) async {
     final isar = await _openIsar();
 
     Future<List<ItineraryModel>> res = maxCount != null
-        ? isar.itineraryModels
-        .where()
-        .sortByName()
-        .limit(maxCount)
-        .findAll()
+        ? isar.itineraryModels.where().sortByName().limit(maxCount).findAll()
         : isar.itineraryModels.where().sortByName().findAll();
 
     isar.close();
@@ -91,5 +91,13 @@ class DataBaseSource {
       await isar.itineraryModels.put(model);
     });
     isar.close();
+  }
+
+  /// Returns number of itineraries stored in database.
+  Future<int> getItinerariesCount() async {
+    final isar = await _openIsar();
+    int count = await isar.itineraryModels.where().count();
+    isar.close();
+    return count;
   }
 }

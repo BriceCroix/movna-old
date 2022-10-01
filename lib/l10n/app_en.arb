@@ -60,5 +60,41 @@
     "myItineraries": "My itineraries",
     "myGear": "My gear",
 
-    "settings": "Settings"
+    "settings": "Settings",
+
+    "loading": "Loading",
+
+    "userName": "Name",
+    "userHeight": "Height (m)",
+    "userWeight": "Weight (kg)",
+    "userGender": "Gender",
+
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderUndefined": "Undefined",
+
+    "itinerariesCountText": "You have {count} saved itineraries",
+    "@itinerariesCountText": {
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern",
+                "example": "8"
+            }
+        }
+    },
+    "gearCountText": "You have registered {count} pieces of gear",
+    "@gearCountText": {
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern",
+                "example": "3"
+            }
+        }
+    },
+
+    "automaticPauseThreshold": "Automatic pause threshold (km/h)",
+    "automaticPauseDurationWithoutMovement": "Automatic pause duration threshold (s)",
+    "automaticLockDuration": "Automatic lock duration threshold (s)"
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 /// Translates [sport] according to given [context].
-String translateSport(Sport sport, BuildContext context){
+String translateSport(Sport sport, BuildContext context) {
   late String translation;
-  switch(sport){
-
+  switch (sport) {
     case Sport.other:
       translation = AppLocalizations.of(context)!.other;
       break;
@@ -84,6 +84,23 @@ String translateSport(Sport sport, BuildContext context){
       break;
     case Sport.horseRiding:
       translation = AppLocalizations.of(context)!.sportHorseRiding;
+      break;
+  }
+  return translation;
+}
+
+/// Translates [gender] according to given [context].
+String translateGender(Gender gender, BuildContext context) {
+  late String translation;
+  switch (gender) {
+    case Gender.male:
+      translation = AppLocalizations.of(context)!.genderMale;
+      break;
+    case Gender.female:
+      translation = AppLocalizations.of(context)!.genderFemale;
+      break;
+    case Gender.undefined:
+      translation = AppLocalizations.of(context)!.genderUndefined;
       break;
   }
   return translation;
