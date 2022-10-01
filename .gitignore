@@ -16,10 +16,8 @@ migrate_working_dir/
 *.iws
 .idea/
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
+# The .vscode folder may be versionned in the future
+.vscode/
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -50,3 +48,6 @@ app.*.map.json
 *.g.dart
 *.freezed.dart
 injection.config.dart
+
+# Windows is not supposed to be enabled
+windows/
