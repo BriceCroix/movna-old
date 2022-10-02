@@ -46,6 +46,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? TextField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 controller: TextEditingController(
                                     text: state.settings.userName),
                                 onSubmitted: (value) => context
@@ -65,6 +67,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? NumberField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 allowDecimal: true,
                                 controller: TextEditingController(
                                     text: state.settings.userHeightInMeters
@@ -88,6 +92,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? NumberField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 allowDecimal: true,
                                 controller: TextEditingController(
                                     text: state.settings.userWeightInKilograms
@@ -181,6 +187,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? NumberField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 allowDecimal: true,
                                 controller: TextEditingController(
                                     text: state.settings
@@ -205,6 +213,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? NumberField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 allowDecimal: false,
                                 controller: TextEditingController(
                                     text: state
@@ -230,6 +240,8 @@ class _ProfileTabView extends StatelessWidget {
                         width: textFieldsWidth,
                         child: state is ProfileTabLoaded
                             ? NumberField(
+                                decoration:
+                                    const InputDecoration(isDense: true),
                                 allowDecimal: false,
                                 controller: TextEditingController(
                                     text: state

@@ -10,18 +10,16 @@ class NumberField extends StatelessWidget {
     this.value,
     this.onChanged,
     this.onSubmitted,
-    this.error,
-    this.icon,
     this.allowDecimal = false,
+    this.decoration,
   });
 
   final TextEditingController? controller;
   final String? value;
   final Function(String)? onChanged;
   final Function(String)? onSubmitted;
-  final String? error;
-  final Widget? icon;
   final bool allowDecimal;
+  final InputDecoration? decoration;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +36,7 @@ class NumberField extends StatelessWidget {
           ),
         ),
       ],
-      decoration: InputDecoration(
-        //label: Text(label),
-        errorText: error,
-        icon: icon,
-      ),
+      decoration: decoration,
     );
   }
 

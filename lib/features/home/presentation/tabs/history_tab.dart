@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/domain/usecases/get_activities.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/features/home/presentation/widgets/activity_card.dart';
 import 'package:movna/core/presentation/widgets/titled_box.dart';
 
@@ -26,12 +26,7 @@ class HistoryTab extends StatelessWidget {
                 future: injector<GetActivities>()(),
                 builder: (context, AsyncSnapshot<List<Activity>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: SpinKitRotatingCircle(
-                        color: Theme.of(context).colorScheme.secondary,
-                        size: 50.0,
-                      ),
-                    );
+                    return const Center(child: MovnaLoadingSpinner());
                   } else {
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(

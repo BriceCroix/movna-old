@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/utils/translator.dart';
+import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/features/home/presentation/bloc/start_tab_bloc.dart';
 
@@ -106,10 +106,7 @@ class _StartTabView extends StatelessWidget {
           (previous is! StartTabLoaded && current is StartTabLoaded),
       builder: (context, state) {
         return state is! StartTabLoaded
-            ? SpinKitRotatingCircle(
-                color: Theme.of(context).colorScheme.secondary,
-                size: 50.0,
-              )
+            ? const MovnaLoadingSpinner()
             : Scaffold(
                 body: FlutterMap(
                   mapController: _mapController,
