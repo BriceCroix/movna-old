@@ -12,9 +12,7 @@ class Activity with _$Activity {
 
   factory Activity({
     /// All the trackpoints of this activity.
-    /// A null value indicates that this activity is not fully loaded.
-    /// If the activity is mapped but no trackpoints are available then it is
-    /// non null but empty.
+    //TODO : replace by List<List<TrackPoint>> in order to know when pauses occurred
     @Default([]) List<TrackPoint> trackPoints,
 
     /// Optional name of this activity.

@@ -26,8 +26,6 @@ class SettingsModel with _$SettingsModel {
     // Miscellaneous -----------------------------------------------------------
     @Default(1.5) double automaticPauseThresholdSpeedInKilometersPerHour,
     @Default(Duration(seconds: 3))
-        Duration automaticPauseThresholdDurationWithoutMovement,
-    @Default(Duration(seconds: 3))
         Duration automaticLockThresholdDurationWithoutInput,
   }) = _SettingsModel;
 
@@ -45,8 +43,6 @@ class SettingsModel with _$SettingsModel {
         userGender: settings.userGender,
         automaticPauseThresholdSpeedInKilometersPerHour:
             settings.automaticPauseThresholdSpeedInKilometersPerHour,
-        automaticPauseThresholdDurationWithoutMovement:
-            settings.automaticPauseThresholdDurationWithoutMovement,
         automaticLockThresholdDurationWithoutInput:
             settings.automaticLockThresholdDurationWithoutInput,
       );
@@ -62,8 +58,6 @@ class SettingsModel with _$SettingsModel {
       userGender: userGender,
       automaticPauseThresholdSpeedInKilometersPerHour:
           automaticPauseThresholdSpeedInKilometersPerHour,
-      automaticPauseThresholdDurationWithoutMovement:
-          automaticPauseThresholdDurationWithoutMovement,
       automaticLockThresholdDurationWithoutInput:
           automaticLockThresholdDurationWithoutInput);
 }

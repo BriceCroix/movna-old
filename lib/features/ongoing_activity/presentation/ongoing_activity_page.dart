@@ -10,6 +10,7 @@ import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/colors.dart';
 import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
+import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 import 'package:wakelock/wakelock.dart';
 
@@ -57,7 +58,9 @@ class OngoingActivityView extends StatelessWidget {
     return FloatingActionButton(
       heroTag: 'pause',
       backgroundColor: pauseColor,
-      onPressed: () => context.read<OngoingActivityBloc>().add(PauseEvent()),
+      onPressed: () => context.read<OngoingActivityBloc>().add(
+          const PauseStatusChangedEvent(
+              pauseStatus: PauseStatus.pausedManually)),
       child: const Icon(Icons.pause_rounded),
     );
   }
@@ -78,7 +81,9 @@ class OngoingActivityView extends StatelessWidget {
       heroTag: 'resume',
       key: UniqueKey(),
       backgroundColor: startColor,
-      onPressed: () => context.read<OngoingActivityBloc>().add(ResumeEvent()),
+      onPressed: () => context
+          .read<OngoingActivityBloc>()
+          .add(const PauseStatusChangedEvent(pauseStatus: PauseStatus.running)),
       child: const Icon(Icons.play_arrow_rounded),
     );
   }

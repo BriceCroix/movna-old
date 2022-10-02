@@ -10,6 +10,7 @@ import 'package:movna/core/domain/usecases/get_settings.dart';
 import 'package:movna/core/domain/usecases/save_activity.dart';
 import 'package:movna/core/domain/usecases/save_settings.dart';
 import 'package:movna/features/ongoing_activity/data/models/chronometer.dart';
+import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point.dart';
 import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point_stream.dart';
 
@@ -38,6 +39,9 @@ class OngoingActivityBloc
   /// Countdown timer, automatic pause pushed when duration is out.
   Timer? _automaticPauseTimer;
 
+  /// The duration at the end of which a trackpoint is requested to update position.
+  static const Duration _maxDurationWithoutMovement = Duration(seconds: 2);
+
   OngoingActivityBloc(
     this._saveActivity,
     this._getSettings,
@@ -47,9 +51,8 @@ class OngoingActivityBloc
   ) : super(const OngoingActivityInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
     on<MapReadyEvent>(_onMapReadyEvent);
-    on<PauseEvent>(_onPauseEvent);
+    on<PauseStatusChangedEvent>(_onPauseStatusChangedEvent);
     on<StopEvent>(_onStopEvent);
-    on<ResumeEvent>(_onResumeEvent);
     on<LockEvent>(_onLockEvent);
     on<UnlockEvent>(_onUnlockEvent);
     on<StartEvent>(_onStartEvent);
@@ -57,11 +60,11 @@ class OngoingActivityBloc
     on<TimeIntervalElapsedEvent>(_onTimeIntervalElapsedEvent);
 
     _getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
-    _getTrackPoint().then((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
+    _requestTrackPoint();
 
     _getTrackPointStream().then((stream) {
-      _trackPointSubscription =
-          stream.listen((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
+      _trackPointSubscription = stream.listen(
+          (trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
     });
   }
 
@@ -90,17 +93,33 @@ class OngoingActivityBloc
       MapReadyEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
-      emit(stateLoaded.copyWith(isMapReady : true));
+      emit(stateLoaded.copyWith(isMapReady: true));
     }
   }
 
-  void _onPauseEvent(PauseEvent event, Emitter<OngoingActivityState> emit) {
+  void _onPauseStatusChangedEvent(
+      PauseStatusChangedEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
-      _durationSubscription?.pause();
-      emit(stateLoaded.copyWith(isPaused: true));
-      _cancelAutomaticLockTimer();
-      _cancelAutomaticPauseTimer();
+      OngoingActivityLoaded newState =
+          stateLoaded.copyWith(pauseStatus: event.pauseStatus);
+      if (newState.isPaused) {
+        _durationSubscription?.pause();
+        _cancelAutomaticLockTimer();
+        _cancelAutomaticPauseTimer();
+      } else {
+        // On resume, add a new trackPoint to activity
+        Activity newActivity = stateLoaded.activity.copyWith(
+          trackPoints: [
+            ...stateLoaded.activity.trackPoints,
+            stateLoaded.lastTrackPoint
+          ],
+        );
+        newState = newState.copyWith(isLocked: true, activity: newActivity);
+        _durationSubscription?.resume();
+        _resetAutomaticPauseTimer();
+      }
+      emit(newState);
     }
   }
 
@@ -117,15 +136,6 @@ class OngoingActivityBloc
       _cancelAutomaticPauseTimer();
 
       emit(OngoingActivityDone(activity: activityDone));
-    }
-  }
-
-  void _onResumeEvent(ResumeEvent event, Emitter<OngoingActivityState> emit) {
-    if (state is OngoingActivityLoaded) {
-      OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
-      _durationSubscription?.resume();
-      emit(stateLoaded.copyWith(isPaused: false, isLocked: true));
-      _resetAutomaticPauseTimer();
     }
   }
 
@@ -159,7 +169,7 @@ class OngoingActivityBloc
               sport: stateLoading.settings!.sport,
               trackPoints: <TrackPoint>[stateLoading.trackPoint!]),
           isLocked: true,
-          isPaused: false,
+          pauseStatus: PauseStatus.running,
           lastTrackPoint: stateLoading.trackPoint!,
         ),
       );
@@ -193,8 +203,9 @@ class OngoingActivityBloc
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
 
       TrackPoint newTrackPoint = event.trackPoint;
-      if(newTrackPoint.speedInKilometersPerHour == null) {
-        // Update speed value if missing
+
+      // Update speed value if missing
+      if (newTrackPoint.speedInKilometersPerHour == null) {
         double? speedInKmPerHour = newTrackPoint
             .speedInKilometersPerHourFrom(stateLoaded.lastTrackPoint);
         newTrackPoint = newTrackPoint.copyWith(
@@ -202,9 +213,26 @@ class OngoingActivityBloc
         );
       }
 
+      // Handle automatic pause if activated
+      if (stateLoaded.settings.automaticPause &&
+          newTrackPoint.speedInKilometersPerHour != null) {
+        bool shouldBePaused = newTrackPoint.speedInKilometersPerHour! <
+            stateLoaded
+                .settings.automaticPauseThresholdSpeedInKilometersPerHour;
+        if (shouldBePaused && !stateLoaded.isPaused) {
+          add(const PauseStatusChangedEvent(
+              pauseStatus: PauseStatus.pausedAutomatically));
+        } else if (!shouldBePaused &&
+            stateLoaded.pauseStatus == PauseStatus.pausedAutomatically) {
+          add(const PauseStatusChangedEvent(pauseStatus: PauseStatus.running));
+        }
+      }
+
       // Only update activity if not paused
       late Activity newActivity;
       if (!stateLoaded.isPaused) {
+        // Reset the timer
+        _resetAutomaticPauseTimer();
         // Compute distance
         double lastDistance = newTrackPoint.position!
             .distanceInMetersFrom(stateLoaded.lastTrackPoint.position!);
@@ -218,29 +246,10 @@ class OngoingActivityBloc
         newActivity = stateLoaded.activity;
       }
 
-      // Handle automatic pause if activated
-      late bool newIsPaused;
-      if (stateLoaded.settings.automaticPause && newTrackPoint.speedInKilometersPerHour != null) {
-        newIsPaused = newTrackPoint.speedInKilometersPerHour! <
-            stateLoaded
-                .settings.automaticPauseThresholdSpeedInKilometersPerHour;
-        if (newIsPaused && !stateLoaded.isPaused) {
-          add(PauseEvent());
-        } else if (!newIsPaused && stateLoaded.isPaused) {
-          add(ResumeEvent());
-        }
-      } else {
-        newIsPaused = stateLoaded.isPaused;
-      }
-      if (!newIsPaused) {
-        _resetAutomaticPauseTimer();
-      }
-
       // Finally emit state
       emit(stateLoaded.copyWith(
         activity: newActivity,
         lastTrackPoint: newTrackPoint,
-        isPaused: newIsPaused,
       ));
     }
   }
@@ -252,10 +261,9 @@ class OngoingActivityBloc
       if (stateLoaded.settings.automaticLock) {
         _automaticLockTimer?.cancel();
         _automaticLockTimer = Timer(
-            stateLoaded.settings.automaticLockThresholdDurationWithoutInput,
-            () {
-          add(LockEvent());
-        });
+          stateLoaded.settings.automaticLockThresholdDurationWithoutInput,
+          () => add(LockEvent()),
+        );
       }
     }
   }
@@ -271,11 +279,8 @@ class OngoingActivityBloc
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
       if (stateLoaded.settings.automaticPause) {
         _automaticPauseTimer?.cancel();
-        _automaticPauseTimer = Timer(
-            stateLoaded.settings.automaticPauseThresholdDurationWithoutMovement,
-            () {
-          add(PauseEvent());
-        });
+        _automaticPauseTimer =
+            Timer(_maxDurationWithoutMovement, () => _requestTrackPoint());
       }
     }
   }
@@ -283,5 +288,11 @@ class OngoingActivityBloc
   /// Cancels the automatic pause timer if started.
   void _cancelAutomaticPauseTimer() {
     _automaticPauseTimer?.cancel();
+  }
+
+  /// Request a TrackPoint update to push a NewTrackPointEvent.
+  void _requestTrackPoint() {
+    _getTrackPoint()
+        .then((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
   }
 }

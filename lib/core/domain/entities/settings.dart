@@ -43,10 +43,6 @@ class Settings with _$Settings {
     /// activate the automatic pause feature.
     required double automaticPauseThresholdSpeedInKilometersPerHour,
 
-    /// The duration during which no new location is received to consider the
-    /// user immobile to activate the automatic pause feature.
-    required Duration automaticPauseThresholdDurationWithoutMovement,
-
     // /// The preferred type of units.
     // @Default(UnitType.metric) UnitType unitType,
 

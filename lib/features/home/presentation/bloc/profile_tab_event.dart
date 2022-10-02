@@ -55,13 +55,6 @@ class AutomaticPauseSpeedThresholdChanged extends ProfileTabEvent {
   const AutomaticPauseSpeedThresholdChanged({required this.thresholdInKmPH});
 }
 
-class AutomaticPauseDurationThresholdChanged extends ProfileTabEvent {
-  final int durationInSeconds;
-
-  const AutomaticPauseDurationThresholdChanged(
-      {required this.durationInSeconds});
-}
-
 class AutomaticLockDurationThresholdChanged extends ProfileTabEvent {
   final int durationInSeconds;
 

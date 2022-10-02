@@ -39,7 +39,7 @@ class OngoingActivityLoaded extends OngoingActivityState {
     required this.settings,
     required this.activity,
     required this.isLocked,
-    required this.isPaused,
+    required this.pauseStatus,
     required this.lastTrackPoint,
     this.isMapReady = false,
   });
@@ -54,7 +54,7 @@ class OngoingActivityLoaded extends OngoingActivityState {
   final bool isLocked;
 
   /// Is the activity paused or not
-  final bool isPaused;
+  final PauseStatus pauseStatus;
 
   /// Last trackpoint data even when the activity is paused
   final TrackPoint lastTrackPoint;
@@ -66,7 +66,7 @@ class OngoingActivityLoaded extends OngoingActivityState {
     Settings? settings,
     Activity? activity,
     bool? isLocked,
-    bool? isPaused,
+    PauseStatus? pauseStatus,
     TrackPoint? lastTrackPoint,
     bool? isMapReady,
   }) {
@@ -74,15 +74,19 @@ class OngoingActivityLoaded extends OngoingActivityState {
       settings: settings ?? this.settings,
       activity: activity ?? this.activity,
       isLocked: isLocked ?? this.isLocked,
-      isPaused: isPaused ?? this.isPaused,
+      pauseStatus: pauseStatus ?? this.pauseStatus,
       lastTrackPoint: lastTrackPoint ?? this.lastTrackPoint,
       isMapReady: isMapReady ?? this.isMapReady,
     );
   }
 
+  bool get isPaused =>
+      pauseStatus == PauseStatus.pausedAutomatically ||
+      pauseStatus == PauseStatus.pausedManually;
+
   @override
   List<Object?> get props =>
-      [settings, activity, isLocked, isPaused, lastTrackPoint, isMapReady];
+      [settings, activity, isLocked, pauseStatus, lastTrackPoint, isMapReady];
 }
 
 /// Final state indicating that page must be changed.

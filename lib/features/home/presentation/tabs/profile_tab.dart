@@ -203,34 +203,7 @@ class _ProfileTabView extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // automatic pause duration without movement threshold
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(AppLocalizations.of(context)!
-                          .automaticPauseDurationWithoutMovement),
-                      SizedBox(
-                        width: textFieldsWidth,
-                        child: state is ProfileTabLoaded
-                            ? NumberField(
-                                decoration:
-                                    const InputDecoration(isDense: true),
-                                allowDecimal: false,
-                                controller: TextEditingController(
-                                    text: state
-                                        .settings
-                                        .automaticPauseThresholdDurationWithoutMovement
-                                        .inSeconds
-                                        .toString()),
-                                onSubmitted: (value) => context
-                                    .read<ProfileTabBloc>()
-                                    .add(AutomaticPauseDurationThresholdChanged(
-                                        durationInSeconds: int.parse(value))),
-                              )
-                            : Text(AppLocalizations.of(context)!.loading),
-                      ),
-                    ],
-                  ),
+
                   // automatic lock duration without input
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

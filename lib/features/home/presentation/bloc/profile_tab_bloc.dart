@@ -33,8 +33,6 @@ class ProfileTabBloc extends Bloc<ProfileTabEvent, ProfileTabState> {
     on<UserGenderChanged>(_onUserGenderChanged);
     on<AutomaticPauseSpeedThresholdChanged>(
         _onAutomaticPauseSpeedThresholdChanged);
-    on<AutomaticPauseDurationThresholdChanged>(
-        _onAutomaticPauseDurationThresholdChanged);
     on<AutomaticLockDurationThresholdChanged>(
         _onAutomaticLockDurationThresholdChanged);
 
@@ -143,21 +141,6 @@ class ProfileTabBloc extends Bloc<ProfileTabEvent, ProfileTabState> {
       ProfileTabLoaded stateLoaded = state as ProfileTabLoaded;
       Settings newSettings = stateLoaded.settings.copyWith(
         automaticPauseThresholdSpeedInKilometersPerHour: event.thresholdInKmPH,
-      );
-      emit(stateLoaded.copyWith(settings: newSettings));
-      saveSettings(newSettings);
-    }
-  }
-
-  void _onAutomaticPauseDurationThresholdChanged(
-    AutomaticPauseDurationThresholdChanged event,
-    Emitter<ProfileTabState> emit,
-  ) {
-    if (state is ProfileTabLoaded) {
-      ProfileTabLoaded stateLoaded = state as ProfileTabLoaded;
-      Settings newSettings = stateLoaded.settings.copyWith(
-        automaticPauseThresholdDurationWithoutMovement:
-            Duration(seconds: event.durationInSeconds),
       );
       emit(stateLoaded.copyWith(settings: newSettings));
       saveSettings(newSettings);
