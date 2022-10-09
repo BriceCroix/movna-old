@@ -9,7 +9,9 @@
     "home": "Home",
     "activity": "Activity",
     "activities": "Activities",
-    "noActivityYet": "No activity yet",
+    "noActivitiesYet": "No activities yet",
+    "noItinerariesYet": "No itineraries yet",
+    "noGearYet": "No gear yet",
     "profile": "Profile",
     "speed": "Speed",
     "averageSpeed": "Average speed",
@@ -21,6 +23,7 @@
     "automaticLock": "Automatic lock",
     "start": "Start",
     "sport": "Sport",
+    "name": "Name",
 
     "startTime": "Starting time",
     "endTime": "Ending time",
@@ -95,6 +98,30 @@
     },
 
     "automaticPauseThreshold": "Automatic pause threshold (km/h)",
-    "automaticPauseDurationWithoutMovement": "Automatic pause duration threshold (s)",
-    "automaticLockDuration": "Automatic lock duration threshold (s)"
+    "automaticLockDuration": "Automatic lock duration threshold (s)",
+
+    "gearType": "Gear type",
+    "myNewGear": "My new gear",
+
+    "gearTypeShoes": "Shoes",
+    "gearTypeBike": "Bike",
+    "gearTypeElectricBike": "Electric bike",
+    "gearTypeSkis": "Skis",
+    "gearTypeSnowboard": "Snowboard",
+    "gearTypeIceSkates": "Ice skates",
+    "gearTypeFlippers": "Flippers",
+    "gearTypeKayak": "Kayak",
+    "gearTypePaddleBoard": "Paddle board",
+    "gearTypeSurfBoard": "Surf board",
+    "gearTypeWindsurfBoard": "Windsurf board",
+    "gearTypeScooter": "Scooter",
+    "gearTypeSkateboard": "Skateboard",
+    "gearTypeRollerblades": "Rollerblades",
+    "gearTypeHorse": "Horse",
+
+    "deleteAlertTitle": "Are you sure ?",
+    "deleteAlertText": "Deletion is irreversible, do you want to proceed ?",
+
+    "cancel": "Cancel",
+    "confirm": "Confirm"
 }

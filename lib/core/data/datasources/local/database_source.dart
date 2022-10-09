@@ -64,6 +64,14 @@ class DataBaseSource {
     isar.close();
   }
 
+  Future<void> removeGearFromDatabase(GearModel model) async {
+    final isar = await _openIsar();
+    await isar.writeTxn((isar) async {
+      await isar.gearModels.delete(model.id);
+    });
+    isar.close();
+  }
+
   /// Returns number of gear models in database.
   Future<int> getGearCount() async {
     final isar = await _openIsar();

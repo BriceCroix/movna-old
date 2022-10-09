@@ -9,6 +9,7 @@ import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
+import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/past_activity/presentation/blocs/past_activity_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -22,13 +23,13 @@ class PastActivityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => injector<PastActivityBloc>(),
-      child: PastActivityView(activity: _activity),
+      child: _PastActivityView(activity: _activity),
     );
   }
 }
 
-class PastActivityView extends StatelessWidget {
-  PastActivityView({Key? key, required Activity activity})
+class _PastActivityView extends StatelessWidget {
+  _PastActivityView({Key? key, required Activity activity})
       : _activity = activity,
         super(key: key);
   final Activity _activity;
@@ -112,9 +113,6 @@ class PastActivityView extends StatelessWidget {
     double zoom = _getZoom(
         context, minLatitude, maxLatitude, minLongitude, maxLongitude, 1.2);
 
-    /// The padding to use for the activity data under the map
-    const double dataColumnPadding = 10;
-
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text(AppLocalizations.of(context)!.activity)),
@@ -163,7 +161,7 @@ class PastActivityView extends StatelessWidget {
             ),
           ),
           Container(
-            padding: const EdgeInsets.all(dataColumnPadding),
+            padding: const EdgeInsets.all(globalPadding),
             child: Column(
               children: [
                 Row(
@@ -173,7 +171,7 @@ class PastActivityView extends StatelessWidget {
                     Text(translateSport(_activity.sport, context)),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -181,7 +179,7 @@ class PastActivityView extends StatelessWidget {
                     Text(_activity.startTime.toString()),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -189,7 +187,7 @@ class PastActivityView extends StatelessWidget {
                     Text(_activity.stopTime.toString()),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -201,7 +199,7 @@ class PastActivityView extends StatelessWidget {
                         .padLeft(8, '0')),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -214,7 +212,7 @@ class PastActivityView extends StatelessWidget {
                         .padLeft(8, '0')),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -222,7 +220,7 @@ class PastActivityView extends StatelessWidget {
                     Text('${_activity.distanceInMeters.toStringAsFixed(0)} m'),
                   ],
                 ),
-                const SizedBox(height: dataColumnPadding),
+                const SizedBox(height: globalPadding),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

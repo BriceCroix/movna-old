@@ -26,7 +26,9 @@ class ProfileTabBloc extends Bloc<ProfileTabEvent, ProfileTabState> {
   }) : super(const ProfileTabInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
     on<ItinerariesCountLoaded>(_onItinerariesCountLoaded);
+    on<RefreshItinerariesCount>(_onRefreshItinerariesCount);
     on<GearCountLoaded>(_onGearCountLoaded);
+    on<RefreshGearCount>(_onRefreshGearCount);
     on<UserNameChanged>(_onUserNameChanged);
     on<UserHeightChanged>(_onUserHeightChanged);
     on<UserWeightChanged>(_onUserWeightChanged);
@@ -62,7 +64,15 @@ class ProfileTabBloc extends Bloc<ProfileTabEvent, ProfileTabState> {
       ProfileTabLoading stateLoading = state as ProfileTabLoading;
       emit(stateLoading.copyWith(itinerariesCount: count));
       _checkAndEmitLoadedState(emit);
+    } else if (state is ProfileTabLoaded) {
+      emit((state as ProfileTabLoaded).copyWith(itinerariesCount: count));
     }
+  }
+
+  void _onRefreshItinerariesCount(
+      RefreshItinerariesCount event, Emitter<ProfileTabState> emit) {
+    getItinerariesCount()
+        .then((value) => add(ItinerariesCountLoaded(count: value)));
   }
 
   void _onGearCountLoaded(
@@ -74,7 +84,14 @@ class ProfileTabBloc extends Bloc<ProfileTabEvent, ProfileTabState> {
       ProfileTabLoading stateLoading = state as ProfileTabLoading;
       emit(stateLoading.copyWith(gearCount: count));
       _checkAndEmitLoadedState(emit);
+    } else if (state is ProfileTabLoaded) {
+      emit((state as ProfileTabLoaded).copyWith(gearCount: count));
     }
+  }
+
+  void _onRefreshGearCount(
+      RefreshGearCount event, Emitter<ProfileTabState> emit) {
+    getGearCount().then((value) => add(GearCountLoaded(count: value)));
   }
 
   void _onUserNameChanged(

@@ -19,11 +19,15 @@ class ItinerariesCountLoaded extends ProfileTabEvent {
   const ItinerariesCountLoaded({required this.count});
 }
 
+class RefreshItinerariesCount extends ProfileTabEvent{}
+
 class GearCountLoaded extends ProfileTabEvent {
   final int count;
 
   const GearCountLoaded({required this.count});
 }
+
+class RefreshGearCount extends ProfileTabEvent{}
 
 class UserNameChanged extends ProfileTabEvent {
   final String name;

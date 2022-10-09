@@ -31,7 +31,7 @@ class HistoryTab extends StatelessWidget {
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(
                         child: Text(
-                          AppLocalizations.of(context)!.noActivityYet,
+                          AppLocalizations.of(context)!.noActivitiesYet,
                           style: const TextStyle(color: Colors.grey),
                         ),
                       );

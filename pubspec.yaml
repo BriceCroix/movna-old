@@ -53,6 +53,7 @@ dependencies:
   latlong2: ^0.8.1
   #fl_chart: ^0.55.1
   wakelock: ^0.6.2
+  material_design_icons_flutter: ^5.0.6996
 
 dev_dependencies:
   flutter_test:

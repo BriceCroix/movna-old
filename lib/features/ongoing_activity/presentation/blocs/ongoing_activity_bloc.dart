@@ -231,8 +231,6 @@ class OngoingActivityBloc
       // Only update activity if not paused
       late Activity newActivity;
       if (!stateLoaded.isPaused) {
-        // Reset the timer
-        _resetAutomaticPauseTimer();
         // Compute distance
         double lastDistance = newTrackPoint.position!
             .distanceInMetersFrom(stateLoaded.lastTrackPoint.position!);
@@ -245,6 +243,9 @@ class OngoingActivityBloc
       } else {
         newActivity = stateLoaded.activity;
       }
+
+      // Reset the timer that ultimately requests new TrackPoints
+      _resetAutomaticPauseTimer();
 
       // Finally emit state
       emit(stateLoaded.copyWith(

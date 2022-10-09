@@ -9,6 +9,7 @@ import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
+import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/home/presentation/bloc/start_tab_bloc.dart';
 
 class StartTab extends StatelessWidget {
@@ -33,7 +34,7 @@ class _StartTabView extends StatelessWidget {
       builder: (context, state) {
         state = state as StartTabLoaded;
         return Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(globalPadding),
           child: Column(
             children: [
               Row(

@@ -10,6 +10,7 @@ import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/colors.dart';
 import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
+import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
 import 'package:wakelock/wakelock.dart';
@@ -232,11 +233,11 @@ class OngoingActivityView extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.all(
-                    Radius.circular(8.0),
+                    Radius.circular(globalPadding),
                   ),
                 ),
-                margin: const EdgeInsets.all(8),
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.all(globalPadding),
+                padding: const EdgeInsets.all(globalPadding*2),
                 child: BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                   builder: (context, state) {
                     Activity? activity;

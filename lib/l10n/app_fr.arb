@@ -6,7 +6,9 @@
     "home": "Accueil",
     "activity": "Activité",
     "activities": "Activités",
-    "noActivityYet": "Aucune activité pour le moment",
+    "noActivitiesYet": "Aucune activité pour le moment",
+    "noItinerariesYet": "Aucun itinéraire pour le moment",
+    "noGearYet": "Aucun équipement pour le moment",
     "profile": "Profil",
     "speed": "Vitesse",
     "averageSpeed": "Vitesse moyenne",
@@ -18,6 +20,7 @@
     "automaticLock": "Verrouillage automatique",
     "start": "Commencer",
     "sport": "Sport",
+    "name": "Nom",
 
     "startTime": "Début",
     "endTime": "Fin",
@@ -74,6 +77,30 @@
     "gearCountText": "{count} équipements enregistrés",
 
     "automaticPauseThreshold": "Seuil de pause auto (km/h)",
-    "automaticPauseDurationWithoutMovement": "Temps seuil pause auto (s)",
-    "automaticLockDuration": "Temps seuil verrouillage auto (s)"
+    "automaticLockDuration": "Temps seuil verrouillage auto (s)",
+
+    "gearType": "Type d'équipement",
+    "myNewGear": "Mon nouvel équipement",
+
+    "gearTypeShoes": "Chaussures",
+    "gearTypeBike": "Vélo",
+    "gearTypeElectricBike": "Vélo électrique",
+    "gearTypeSkis": "Skis",
+    "gearTypeSnowboard": "Snowboard",
+    "gearTypeIceSkates": "Patins à glace",
+    "gearTypeFlippers": "Palmes",
+    "gearTypeKayak": "Kayak",
+    "gearTypePaddleBoard": "Planche de paddle",
+    "gearTypeSurfBoard": "Planche de surf",
+    "gearTypeWindsurfBoard": "Planche à voile",
+    "gearTypeScooter": "Trottinette",
+    "gearTypeSkateboard": "Skateboard",
+    "gearTypeRollerblades": "Rollers",
+    "gearTypeHorse": "Cheval",
+
+    "deleteAlertTitle": "Êtes-vous sûr(e) ?",
+    "deleteAlertText": "La suppression est irréversible, voulez-vous poursuivre ?",
+
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
 }

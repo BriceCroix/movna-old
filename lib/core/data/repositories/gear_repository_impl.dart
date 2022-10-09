@@ -41,6 +41,21 @@ class GearRepositoryImpl implements GearRepository {
   }
 
   @override
+  Future<ErrorState> deleteGear(Gear gear) async {
+    try {
+      GearModel model = GearModel.fromGear(gear);
+
+      await dataBaseSource.removeGearFromDatabase(model);
+
+      return false;
+    } catch (e) {
+      Logger logger = Logger();
+      logger.e(e);
+      return true;
+    }
+  }
+
+  @override
   Future<int> getGearCount() async {
     try {
       int count = await dataBaseSource.getGearCount();

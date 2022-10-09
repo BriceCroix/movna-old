@@ -18,17 +18,12 @@ class GearModel {
   GearType gearType;
   @Index()
   String name;
-  double distanceInMeters;
-  @DurationConverter()
-  Duration useTime;
 
   GearModel({
     required this.creationTime,
     required this.localTimeOffset,
     required this.gearType,
     required this.name,
-    required this.distanceInMeters,
-    required this.useTime,
   }) : id = creationTime.microsecondsSinceEpoch;
 
   static GearModel fromGear(Gear gear) {
@@ -37,19 +32,14 @@ class GearModel {
       localTimeOffset: gear.creationTime.timeZoneOffset,
       gearType: gear.gearType,
       name: gear.name,
-      distanceInMeters: gear.distanceInMeters,
-      useTime: gear.useTime,
     );
   }
 
   Gear toGear() {
     return Gear(
-      // TODO handle timezone
       creationTime: creationTime,
       gearType: gearType,
       name: name,
-      distanceInMeters: distanceInMeters,
-      useTime: useTime,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 
 /// If [child] is scrollable, make sure to wrap it in an Expanded widget
 class TitledBox extends StatelessWidget {
@@ -14,7 +15,7 @@ class TitledBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: globalPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

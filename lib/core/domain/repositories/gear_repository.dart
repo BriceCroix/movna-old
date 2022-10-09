@@ -5,6 +5,9 @@ abstract class GearRepository {
   /// Save a piece of [gear] to disk.
   Future<ErrorState> saveGear(Gear gear);
 
+  /// Delete a piece of [gear] from disk.
+  Future<ErrorState> deleteGear(Gear gear);
+
   /// Get all pieces of gear stored on disk, with a maximum of [maxCount] elements.
   Future<List<Gear>> getGear([int? maxCount]);
 

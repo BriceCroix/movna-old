@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movna/core/domain/entities/gear_type.dart';
 import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -101,6 +102,61 @@ String translateGender(Gender gender, BuildContext context) {
       break;
     case Gender.undefined:
       translation = AppLocalizations.of(context)!.genderUndefined;
+      break;
+  }
+  return translation;
+}
+
+String translateGearType(GearType gearType, BuildContext context) {
+  late String translation;
+  switch (gearType) {
+    case GearType.other:
+      translation = AppLocalizations.of(context)!.other;
+      break;
+    case GearType.shoes:
+      translation = AppLocalizations.of(context)!.gearTypeShoes;
+      break;
+    case GearType.bike:
+      translation = AppLocalizations.of(context)!.gearTypeBike;
+      break;
+    case GearType.electricBike:
+      translation = AppLocalizations.of(context)!.gearTypeElectricBike;
+      break;
+    case GearType.skis:
+      translation = AppLocalizations.of(context)!.gearTypeSkis;
+      break;
+    case GearType.snowboard:
+      translation = AppLocalizations.of(context)!.gearTypeSnowboard;
+      break;
+    case GearType.iceSkates:
+      translation = AppLocalizations.of(context)!.gearTypeIceSkates;
+      break;
+    case GearType.flippers:
+      translation = AppLocalizations.of(context)!.gearTypeFlippers;
+      break;
+    case GearType.kayak:
+      translation = AppLocalizations.of(context)!.gearTypeKayak;
+      break;
+    case GearType.paddleBoard:
+      translation = AppLocalizations.of(context)!.gearTypePaddleBoard;
+      break;
+    case GearType.surfBoard:
+      translation = AppLocalizations.of(context)!.gearTypeSurfBoard;
+      break;
+    case GearType.windsurfBoard:
+      translation = AppLocalizations.of(context)!.gearTypeWindsurfBoard;
+      break;
+    case GearType.scooter:
+      translation = AppLocalizations.of(context)!.gearTypeScooter;
+      break;
+    case GearType.skateboard:
+      translation = AppLocalizations.of(context)!.gearTypeSkateboard;
+      break;
+    case GearType.rollerblades:
+      translation = AppLocalizations.of(context)!.gearTypeRollerblades;
+      break;
+    case GearType.horse:
+      translation = AppLocalizations.of(context)!.gearTypeHorse;
       break;
   }
   return translation;

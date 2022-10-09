@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/utils/translator.dart';
 import 'package:movna/core/presentation/widgets/number_field.dart';
 import 'package:movna/core/presentation/widgets/titled_box.dart';
@@ -159,7 +160,9 @@ class _ProfileTabView extends StatelessWidget {
         TitledBox(
           title: AppLocalizations.of(context)!.myGear,
           onMorePressed: () {
-            //TODO
+            // Refresh count when coming back here
+            navigateTo(RouteName.gearList).whenComplete(
+                () => context.read<ProfileTabBloc>().add(RefreshGearCount()));
           },
           child: BlocBuilder<ProfileTabBloc, ProfileTabState>(
               builder: (context, state) {
