@@ -17,12 +17,20 @@ class Itinerary with _$Itinerary {
     required String name,
 
     /// Is this itinerary one of the user favorites.
-    @Default (false) bool isFavorite,
+    @Default(false) bool isFavorite,
 
     /// All the positions of this itinerary.
-    /// A null value indicates that this itinerary is not fully loaded.
-    /// If the itinerary is mapped but no positions are available then it is
-    /// non null but empty.
-    @Default([]) List<Position> positions,
+    required List<Position> positions,
   }) = _Itinerary;
+
+  /// Total distance of this itinerary in meters.
+  double get distanceInMeters {
+    double distance = 0.0;
+    for (int i = 1; i < positions.length; ++i) {
+      distance += positions
+          .elementAt(i)
+          .distanceInMetersFrom(positions.elementAt(i - 1));
+    }
+    return distance;
+  }
 }

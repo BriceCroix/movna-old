@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/features/gear_management/presentation/widgets/gear_list_page.dart';
 import 'package:movna/features/gear_management/presentation/widgets/user_gear_page.dart';
-import 'package:movna/features/home/presentation/home_page.dart';
+import 'package:movna/features/home/presentation/widgets/home_page.dart';
+import 'package:movna/features/itineraries_management/presentation/widgets/itineraries_list_page.dart';
+import 'package:movna/features/itineraries_management/presentation/widgets/user_itinerary_page.dart';
 import 'package:movna/features/ongoing_activity/presentation/ongoing_activity_page.dart';
-import 'package:movna/features/past_activity/presentation/past_activity_page.dart';
+import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
 
 enum RouteName {
   home,
@@ -13,6 +14,8 @@ enum RouteName {
   pastActivity,
   gearList,
   userGear,
+  itinerariesList,
+  userItinerary,
 }
 
 Future navigateTo(RouteName route, [Object? arguments]) async {
@@ -40,10 +43,11 @@ Route generateRoute(RouteSettings settings) {
         return MaterialPageRoute(
             builder: (context) => const OngoingActivityPage());
       case RouteName.pastActivity:
-        if (settings.arguments != null && settings.arguments is Activity) {
-          final Activity activity = settings.arguments! as Activity;
+        if (settings.arguments != null &&
+            settings.arguments is PastActivityPageParams) {
+          final params = settings.arguments! as PastActivityPageParams;
           return MaterialPageRoute(
-              builder: (context) => PastActivityPage(activity: activity));
+              builder: (context) => PastActivityPage(params: params));
         }
         break;
       case RouteName.gearList:
@@ -51,11 +55,23 @@ Route generateRoute(RouteSettings settings) {
       case RouteName.userGear:
         if (settings.arguments != null &&
             settings.arguments is UserGearPageParams) {
-          final UserGearPageParams pageParams =
-              settings.arguments! as UserGearPageParams;
+          final pageParams = settings.arguments! as UserGearPageParams;
           return MaterialPageRoute(
               builder: (context) => UserGearPage(pageParams: pageParams));
         }
+        break;
+      case RouteName.itinerariesList:
+        return MaterialPageRoute(
+            builder: (context) => const ItinerariesListPage());
+      case RouteName.userItinerary:
+        if (settings.arguments != null &&
+            settings.arguments is UserItineraryPageParams) {
+          final pageParams = settings.arguments! as UserItineraryPageParams;
+          return MaterialPageRoute(
+              builder: (context) => UserItineraryPage(pageParams: pageParams));
+        }
+        break;
+      default:
         break;
     }
   }

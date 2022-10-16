@@ -42,6 +42,21 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
   }
 
   @override
+  Future<ErrorState> deleteItinerary(Itinerary itinerary) async {
+    try {
+      ItineraryModel model = ItineraryModel.fromItinerary(itinerary);
+
+      await dataBaseSource.removeItineraryFromDatabase(model);
+
+      return false;
+    } catch (e) {
+      Logger logger = Logger();
+      logger.e(e);
+      return true;
+    }
+  }
+
+  @override
   Future<int> getItinerariesCount() async {
     try {
       int count = await dataBaseSource.getItinerariesCount();

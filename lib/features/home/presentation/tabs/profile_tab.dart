@@ -146,7 +146,9 @@ class _ProfileTabView extends StatelessWidget {
         TitledBox(
           title: AppLocalizations.of(context)!.myItineraries,
           onMorePressed: () {
-            //TODO
+            // Refresh count when coming back here
+            navigateTo(RouteName.itinerariesList).whenComplete(
+                    () => context.read<ProfileTabBloc>().add(RefreshItinerariesCount()));
           },
           child: BlocBuilder<ProfileTabBloc, ProfileTabState>(
               builder: (context, state) {

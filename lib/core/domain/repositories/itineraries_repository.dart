@@ -5,6 +5,9 @@ abstract class ItinerariesRepository {
   /// Save an [itinerary] to disk.
   Future<ErrorState> saveItinerary(Itinerary itinerary);
 
+  /// Deletes the [itinerary] from disk.
+  Future<ErrorState> deleteItinerary(Itinerary itinerary);
+
   /// Get all itineraries stored on disk, with a maximum of [maxCount] elements.
   Future<List<Itinerary>> getItineraries([int? maxCount]);
 

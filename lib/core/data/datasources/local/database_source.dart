@@ -117,6 +117,14 @@ class DataBaseSource {
     isar.close();
   }
 
+  Future<void> removeItineraryFromDatabase(ItineraryModel model) async {
+    final isar = await _openIsar();
+    await isar.writeTxn((isar) async {
+      await isar.itineraryModels.delete(model.id);
+    });
+    isar.close();
+  }
+
   /// Returns number of itineraries stored in database.
   Future<int> getItinerariesCount() async {
     final isar = await _openIsar();

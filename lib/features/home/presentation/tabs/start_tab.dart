@@ -127,7 +127,7 @@ class _StartTabView extends StatelessWidget {
                     BlocBuilder<StartTabBloc, StartTabState>(
                       builder: (context, state) {
                         StartTabLoaded stateLoaded = (state as StartTabLoaded);
-                        return getActivityMarkerLayer(
+                        return getPathMarkerLayer(
                             user: stateLoaded.position);
                       },
                     ),
