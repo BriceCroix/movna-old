@@ -123,5 +123,22 @@
     "deleteAlertText": "Deletion is irreversible, do you want to proceed ?",
 
     "cancel": "Cancel",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+
+    "deleteActivity": "Delete activity",
+    "createItineraryFromActivity": "Create itinerary from activity",
+
+    "defaultItineraryName": "Itinerary of the {date}",
+    "@defaultItineraryName": {
+        "placeholders": {
+            "date": {
+                "type": "DateTime",
+                "format": "yMd",
+                "example": "11/10/2021",
+                "description": "Creation date"
+            }
+        }
+    },
+
+    "none": "None"
 }

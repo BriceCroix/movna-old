@@ -41,4 +41,19 @@ class ActivitiesRepositoryImpl implements ActivitiesRepository {
       return true;
     }
   }
+
+  @override
+  Future<ErrorState> deleteActivity(Activity activity) async {
+    try {
+      ActivityModel model = ActivityModel.fromActivity(activity);
+
+      await dataBaseSource.removeActivityFromDatabase(model);
+
+      return false;
+    } catch (e) {
+      Logger logger = Logger();
+      logger.e(e);
+      return true;
+    }
+  }
 }

@@ -14,7 +14,7 @@ part 'activity_model.g.dart';
 class ActivityModel {
   /// Unique ID of this instance for the database.
   @Id()
-  int? id;
+  int id;
   @Index()
   DateTime startTime;
   DateTime stopTime;

@@ -213,13 +213,13 @@ class OngoingActivityView extends StatelessWidget {
                                 (state as OngoingActivityLoaded);
                             // Add starting point
                             if (stateLoaded.activity.trackPoints.isNotEmpty) {
-                              return getActivityMarkerLayer(
+                              return getPathMarkerLayer(
                                 start: stateLoaded
                                     .activity.trackPoints.first.position,
                                 user: state.lastTrackPoint.position,
                               );
                             } else {
-                              return getActivityMarkerLayer(
+                              return getPathMarkerLayer(
                                   user: state.lastTrackPoint.position);
                             }
                           },

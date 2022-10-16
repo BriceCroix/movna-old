@@ -114,3 +114,6 @@ flutter:
 
   # generate translations with 'flutter gen-l10n'
   generate: true
+
+flutter_intl:
+  enabled: false

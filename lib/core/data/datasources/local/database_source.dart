@@ -38,7 +38,23 @@ class DataBaseSource {
   Future<void> saveActivityToDatabase(ActivityModel model) async {
     final isar = await _openIsar();
     await isar.writeTxn((isar) async {
-      await isar.activityModels.put(model);
+      // putSync takes care of saving all links, but let's keep it async
+
+      if (model.itinerary.value != null) {
+        await isar.itineraryModels.put(model.itinerary.value!);
+      }
+      if (model.gear.value != null) {
+        await isar.gearModels.put(model.gear.value!);
+      }
+      await isar.activityModels.put(model, saveLinks: true);
+    });
+    isar.close();
+  }
+
+  Future<void> removeActivityFromDatabase(ActivityModel model) async {
+    final isar = await _openIsar();
+    await isar.writeTxn((isar) async {
+      await isar.activityModels.delete(model.id);
     });
     isar.close();
   }

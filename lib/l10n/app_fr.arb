@@ -102,5 +102,12 @@
     "deleteAlertText": "La suppression est irréversible, voulez-vous poursuivre ?",
 
     "cancel": "Annuler",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+
+    "deleteActivity": "Supprimer activité",
+    "createItineraryFromActivity": "Créer itinéraire à partir du trajet",
+
+    "defaultItineraryName": "Itineraire du {date}",
+
+    "none": "Aucun"
 }

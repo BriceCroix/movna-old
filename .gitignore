@@ -48,6 +48,7 @@ app.*.map.json
 *.g.dart
 *.freezed.dart
 injection.config.dart
+generated/
 
 # Windows is not supposed to be enabled
 windows/

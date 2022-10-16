@@ -1,7 +1,10 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/domain/entities/itinerary.dart';
 import 'package:movna/core/domain/entities/position.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/presentation/widgets/colors.dart';
@@ -15,25 +18,29 @@ TileLayer getOpenStreetMapTileLayer() {
   );
 }
 
+Polyline _buildItineraryPolyline(Itinerary itinerary) {
+  return Polyline(
+    points: itinerary.positions
+        .map((e) => LatLng(e.latitudeInDegrees, e.longitudeInDegrees))
+        .toList(),
+    color: itineraryPathColor,
+    strokeWidth: 4,
+  );
+}
+
+/// Creates a FlutterMap polyline layer to represent an itinerary.
+PolylineLayer getItineraryPolylineLayer(Itinerary itinerary) => PolylineLayer(
+      polylineCulling: false,
+      polylines: [_buildItineraryPolyline(itinerary)],
+    );
+
 /// Creates a FlutterMap polyline layer to display the activity path over its
 /// itinerary path if available.
-PolylineLayer getActivityPolylineLayer({
-  required Activity activity}
-) {
-  List<Polyline> polyline = [];
+PolylineLayer getActivityPolylineLayer({required Activity activity}) {
+  List<Polyline> polylines = [];
 
-  if(activity.itinerary != null){
-    // Create itinerary polyline
-    List<LatLng> itineraryPoints = [];
-    for (Position p in activity.itinerary!.positions) {
-        itineraryPoints.add(LatLng(
-            p.latitudeInDegrees, p.longitudeInDegrees));
-    }
-    polyline.add(Polyline(
-      points: itineraryPoints,
-      color: itineraryPathColor,
-      strokeWidth: 4,
-    ));
+  if (activity.itinerary != null) {
+    polylines.add(_buildItineraryPolyline(activity.itinerary!));
   }
 
   // Create activity path polyline
@@ -44,7 +51,7 @@ PolylineLayer getActivityPolylineLayer({
           t.position!.latitudeInDegrees, t.position!.longitudeInDegrees));
     }
   }
-  polyline.add(Polyline(
+  polylines.add(Polyline(
     points: activityPoints,
     color: userPositionColor,
     strokeWidth: 4,
@@ -52,11 +59,12 @@ PolylineLayer getActivityPolylineLayer({
 
   return PolylineLayer(
     polylineCulling: false,
-    polylines: polyline,
+    polylines: polylines,
   );
 }
 
-MarkerLayer getActivityMarkerLayer({Position? start, Position? user, Position? stop}){
+MarkerLayer getPathMarkerLayer(
+    {Position? start, Position? user, Position? stop}) {
   List<Marker> markers = [];
   // Add starting point
   if (start != null) {
@@ -91,4 +99,49 @@ MarkerLayer getActivityMarkerLayer({Position? start, Position? user, Position? s
   return MarkerLayer(markers: markers);
 }
 
+/// Computes adequate zoom level according to extremum coordinates to show.
+/// [mapHeight] and [mapWidth] are the size of the map widget in virtual pixels.
+/// a [paddingFactor] above 1.0 allows not to have the extremum points on the border of the map, a typical value is 1.2.
+double getMapZoom(
+  double mapWidth,
+  double mapHeight,
+  double minLatitude,
+  double maxLatitude,
+  double minLongitude,
+  double maxLongitude,
+  double paddingFactor,
+) {
+  // Explanation about zoom values
+  // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Zoom_levels
+  // https://wiki.openstreetmap.org/wiki/Zoom_levels
 
+  // A huge thanks to Igor Brejc who gave their method at :
+  // https://gis.stackexchange.com/questions/19632/how-to-calculate-the-optimal-zoom-level-to-display-two-or-more-points-on-a-map
+
+  double ry1 = math.log((math.sin(minLatitude * math.pi / 180) + 1) /
+      math.cos(minLatitude * math.pi / 180));
+  double ry2 = math.log((math.sin(maxLatitude * math.pi / 180) + 1) /
+      math.cos(maxLatitude * math.pi / 180));
+  double ryc = (ry1 + ry2) / 2;
+  double sinhRyc = (math.exp(ryc) - math.exp(-ryc)) / 2;
+  double centerY = math.atan(sinhRyc) * 180 / math.pi;
+
+  double resolutionHorizontal = (maxLongitude - minLongitude) / mapWidth;
+
+  double vy0 = math.log(math.tan(math.pi * (0.25 + centerY / 360)));
+  double vy1 = math.log(math.tan(math.pi * (0.25 + maxLatitude / 360)));
+  double viewHeightHalf = mapHeight / 2;
+  double zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0));
+  double resolutionVertical = 360.0 / (zoomFactorPowered * 256);
+
+  double resolution =
+      math.max(resolutionHorizontal, resolutionVertical) * paddingFactor;
+  late double zoom;
+  if (resolution > 0) {
+    zoom = math.log(360 / (resolution * 256)) / math.log(2);
+  } else {
+    zoom = 20;
+  }
+
+  return zoom;
+}
