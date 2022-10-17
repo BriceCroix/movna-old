@@ -1,14 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/core/domain/usecases/get_activities.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
+import 'package:movna/features/home/presentation/bloc/history_tab_bloc.dart';
 import 'package:movna/features/home/presentation/widgets/activity_card.dart';
 import 'package:movna/core/presentation/widgets/titled_box.dart';
+import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
 
 class HistoryTab extends StatelessWidget {
   const HistoryTab({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => injector<HistoryTabBloc>(),
+      child: const _HistoryTabView(),
+    );
+  }
+}
+
+class _HistoryTabView extends StatelessWidget {
+  const _HistoryTabView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,28 +37,33 @@ class HistoryTab extends StatelessWidget {
               //TODO : Navigator push pastActivitiesPage
             },
             child: Expanded(
-              child: FutureBuilder(
-                future: injector<GetActivities>()(),
-                builder: (context, AsyncSnapshot<List<Activity>> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+              child: BlocBuilder<HistoryTabBloc, HistoryTabState>(
+                builder: (context, state) {
+                  if (state is! HistoryTabLoaded) {
                     return const Center(child: MovnaLoadingSpinner());
-                  } else {
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(
-                        child: Text(
-                          AppLocalizations.of(context)!.noActivitiesYet,
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      );
-                    } else {
-                      List<Activity> activities = snapshot.data!;
-                      return ListView(
-                        children: activities
-                            .map((activity) => ActivityCard(activity: activity))
-                            .toList(),
-                      );
-                    }
                   }
+                  if (state.activities.isEmpty) {
+                    return Center(
+                      child: Text(
+                        AppLocalizations.of(context)!.noActivitiesYet,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: state.activities.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Activity activity = state.activities.elementAt(index);
+                      return ActivityCard(
+                        activity: activity,
+                        onTap: () => navigateTo(RouteName.pastActivity,
+                            PastActivityPageParams(activity: activity))
+                            .whenComplete(() => context
+                            .read<HistoryTabBloc>()
+                            .add(RefreshActivities())),
+                      );
+                    },
+                  );
                 },
               ),
             ),

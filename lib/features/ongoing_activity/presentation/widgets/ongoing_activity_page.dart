@@ -13,9 +13,10 @@ import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
+import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
 import 'package:wakelock/wakelock.dart';
 
-import 'blocs/ongoing_activity_bloc.dart';
+import '../blocs/ongoing_activity_bloc.dart';
 
 class OngoingActivityPage extends StatelessWidget {
   const OngoingActivityPage({Key? key}) : super(key: key);
@@ -24,13 +25,13 @@ class OngoingActivityPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => injector<OngoingActivityBloc>(),
-      child: OngoingActivityView(),
+      child: _OngoingActivityView(),
     );
   }
 }
 
-class OngoingActivityView extends StatelessWidget {
-  OngoingActivityView({Key? key}) : super(key: key);
+class _OngoingActivityView extends StatelessWidget {
+  _OngoingActivityView({Key? key}) : super(key: key);
 
   final MapController _mapController = MapController();
 
@@ -237,7 +238,7 @@ class OngoingActivityView extends StatelessWidget {
                   ),
                 ),
                 margin: const EdgeInsets.all(globalPadding),
-                padding: const EdgeInsets.all(globalPadding*2),
+                padding: const EdgeInsets.all(globalPadding * 2),
                 child: BlocBuilder<OngoingActivityBloc, OngoingActivityState>(
                   builder: (context, state) {
                     Activity? activity;
@@ -352,7 +353,10 @@ class OngoingActivityView extends StatelessWidget {
           Wakelock.disable();
           _mapController.dispose();
           // Handle navigation at the end of the activity
-          navigateToReplacement(RouteName.pastActivity, state.activity);
+          navigateToReplacement(
+            RouteName.pastActivity,
+            PastActivityPageParams(activity: state.activity),
+          );
         } else if (state is OngoingActivityLoaded) {
           // Handle screen power (always-on)
           Wakelock.enable();

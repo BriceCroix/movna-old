@@ -5,7 +5,7 @@ import 'package:movna/features/gear_management/presentation/widgets/user_gear_pa
 import 'package:movna/features/home/presentation/widgets/home_page.dart';
 import 'package:movna/features/itineraries_management/presentation/widgets/itineraries_list_page.dart';
 import 'package:movna/features/itineraries_management/presentation/widgets/user_itinerary_page.dart';
-import 'package:movna/features/ongoing_activity/presentation/ongoing_activity_page.dart';
+import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_page.dart';
 import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
 
 enum RouteName {

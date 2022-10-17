@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/utils/illustrator.dart';
-import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
 
 class ActivityCard extends StatelessWidget {
   final Activity activity;
+  final void Function()? onTap;
 
-  const ActivityCard({Key? key, required this.activity}) : super(key: key);
+  const ActivityCard({
+    Key? key,
+    required this.activity,
+    this.onTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,9 +30,7 @@ class ActivityCard extends StatelessWidget {
             activity.name ?? '${AppLocalizations.of(context)!.activity} $date'),
         subtitle: Text('$date, $duration, $distance'),
         dense: true,
-        //TODO turn that callback into a widget parameter
-        onTap: () => navigateTo(
-            RouteName.pastActivity, PastActivityPageParams(activity: activity)),
+        onTap: onTap,
       ),
     );
   }
