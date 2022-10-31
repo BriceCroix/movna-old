@@ -7,6 +7,15 @@ abstract class OngoingActivityEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class ParametersGiven extends OngoingActivityEvent {
+  final OngoingActivityPageParams pageParams;
+
+  const ParametersGiven(this.pageParams);
+
+  @override
+  List<Object> get props => [pageParams];
+}
+
 class SettingsLoaded extends OngoingActivityEvent {
   final Settings settings;
 

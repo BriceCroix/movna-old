@@ -19,6 +19,12 @@ class SettingsLoaded extends StartTabEvent {
   const SettingsLoaded({required this.settings});
 }
 
+class ItinerariesLoaded extends StartTabEvent {
+  final List<Itinerary> itineraries;
+
+  const ItinerariesLoaded({required this.itineraries});
+}
+
 class SportSettingChanged extends StartTabEvent {
   final Sport sport;
 
@@ -26,6 +32,15 @@ class SportSettingChanged extends StartTabEvent {
 
   @override
   List<Object?> get props => [sport];
+}
+
+class ItinerarySettingChanged extends StartTabEvent {
+  final Itinerary? itinerary;
+
+  const ItinerarySettingChanged({required this.itinerary});
+
+  @override
+  List<Object?> get props => [itinerary];
 }
 
 class AutoPauseSettingChanged extends StartTabEvent {

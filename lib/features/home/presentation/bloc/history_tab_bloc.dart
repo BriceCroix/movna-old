@@ -13,7 +13,7 @@ class HistoryTabBloc extends Bloc<HistoryTabEvent, HistoryTabState> {
   final GetActivities getActivities;
 
   /// Number of activities fetched by this bloc.
-  static const int _activitiesCount = 3;
+  static const int _activitiesCount = 10;
 
   HistoryTabBloc({
     required this.getActivities,

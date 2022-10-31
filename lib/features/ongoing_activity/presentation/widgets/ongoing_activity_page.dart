@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/domain/entities/ongoing_activity_settings.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/colors.dart';
@@ -18,13 +19,25 @@ import 'package:wakelock/wakelock.dart';
 
 import '../blocs/ongoing_activity_bloc.dart';
 
+class OngoingActivityPageParams {
+  const OngoingActivityPageParams({required this.ongoingActivitySettings});
+
+  final OngoingActivitySettings ongoingActivitySettings;
+}
+
 class OngoingActivityPage extends StatelessWidget {
-  const OngoingActivityPage({Key? key}) : super(key: key);
+  const OngoingActivityPage({
+    required OngoingActivityPageParams params,
+    Key? key,
+  })  : _params = params,
+        super(key: key);
+
+  final OngoingActivityPageParams _params;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => injector<OngoingActivityBloc>(),
+      create: (_) => injector<OngoingActivityBloc>()..add(ParametersGiven(_params)),
       child: _OngoingActivityView(),
     );
   }

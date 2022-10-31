@@ -3,15 +3,19 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:movna/core/domain/entities/itinerary.dart';
+import 'package:movna/core/domain/entities/ongoing_activity_settings.dart';
 import 'package:movna/core/domain/entities/position.dart';
 import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/sport.dart';
+import 'package:movna/core/domain/usecases/get_itineraries.dart';
 import 'package:movna/core/domain/usecases/get_position.dart';
 import 'package:movna/core/domain/usecases/get_position_stream.dart';
 import 'package:movna/core/domain/usecases/get_settings.dart';
 import 'package:movna/core/domain/usecases/save_settings.dart';
 
 part 'start_tab_event.dart';
+
 part 'start_tab_state.dart';
 
 @injectable
@@ -20,6 +24,7 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
   final SaveSettings saveSettings;
   final GetPosition getPosition;
   final GetPositionStream getPositionStream;
+  final GetItineraries getItineraries;
 
   /// Stream yielding user positions.
   StreamSubscription<Position>? _positionSubscription;
@@ -29,17 +34,22 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
     required this.saveSettings,
     required this.getPosition,
     required this.getPositionStream,
+    required this.getItineraries,
   }) : super(const StartTabInitial()) {
     on<SettingsLoaded>(_onSettingsLoaded);
     on<LocationLoaded>(_onLocationLoaded);
+    on<ItinerariesLoaded>(_onItinerariesLoaded);
     on<SportSettingChanged>(_onSportSettingChanged);
     on<AutoPauseSettingChanged>(_onAutoPauseSettingChanged);
     on<AutoLockSettingChanged>(_onAutoLockSettingChanged);
     on<StartEvent>(_onStartEvent);
     on<PositionChanged>(_onPositionChanged);
+    on<ItinerarySettingChanged>(_onItinerarySettingChanged);
 
     getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
     getPosition().then((position) => add(LocationLoaded(position: position)));
+    getItineraries().then(
+        (itineraries) => add(ItinerariesLoaded(itineraries: itineraries)));
     // TODO cancel these requests in close.
 
     getPositionStream().then((stream) {
@@ -59,11 +69,12 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
     if (state is StartTabInitial) {
       emit(StartTabLoading(settings: settings));
     } else if (state is StartTabLoading) {
-      StartTabLoading stateLoading = state as StartTabLoading;
-      // If more than two fields to load in the future, add an if to check
-      // that all fields are loaded before emitting loaded state
-      emit(
-          StartTabLoaded(settings: settings, position: stateLoading.position!));
+      final stateLoading = state as StartTabLoading;
+      emit(stateLoading.copyWith(settings: settings));
+      _checkAndEmitLoadedState(emit);
+    } else if (state is StartTabLoaded) {
+      final stateLoaded = state as StartTabLoaded;
+      emit(stateLoaded.copyWith(settings: settings));
     }
   }
 
@@ -72,11 +83,27 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
     if (state is StartTabInitial) {
       emit(StartTabLoading(position: position));
     } else if (state is StartTabLoading) {
-      StartTabLoading stateLoading = state as StartTabLoading;
-      // If more than two fields to load in the future, add an if to check
-      // that all fields are loaded before emitting loaded state
-      emit(
-          StartTabLoaded(settings: stateLoading.settings!, position: position));
+      final stateLoading = state as StartTabLoading;
+      emit(stateLoading.copyWith(position: position));
+      _checkAndEmitLoadedState(emit);
+    } else if (state is StartTabLoaded) {
+      final stateLoaded = state as StartTabLoaded;
+      emit(stateLoaded.copyWith(position: position));
+    }
+  }
+
+  void _onItinerariesLoaded(
+      ItinerariesLoaded event, Emitter<StartTabState> emit) {
+    final itineraries = event.itineraries;
+    if (state is StartTabInitial) {
+      emit(StartTabLoading(itineraries: itineraries));
+    } else if (state is StartTabLoading) {
+      final stateLoading = state as StartTabLoading;
+      emit(stateLoading.copyWith(itineraries: itineraries));
+      _checkAndEmitLoadedState(emit);
+    } else if (state is StartTabLoaded) {
+      final stateLoaded = state as StartTabLoaded;
+      emit(stateLoaded.copyWith(itineraries: itineraries));
     }
   }
 
@@ -115,12 +142,43 @@ class StartTabBloc extends Bloc<StartTabEvent, StartTabState> {
   }
 
   void _onSportSettingChanged(
-      SportSettingChanged event, Emitter<StartTabState> emit) {
+    SportSettingChanged event,
+    Emitter<StartTabState> emit,
+  ) {
     if (state is StartTabLoaded) {
       final stateLoaded = (state as StartTabLoaded);
       Settings newSettings = stateLoaded.settings.copyWith(sport: event.sport);
       emit(stateLoaded.copyWith(settings: newSettings));
       saveSettings(newSettings);
+    }
+  }
+
+  void _onItinerarySettingChanged(
+    ItinerarySettingChanged event,
+    Emitter<StartTabState> emit,
+  ) {
+    if (state is StartTabLoaded) {
+      final stateLoaded = (state as StartTabLoaded);
+      emit(stateLoaded.copyWith(
+          ongoingActivitySettings: stateLoaded.ongoingActivitySettings
+              .copyWith(itinerary: event.itinerary)));
+    }
+  }
+
+  /// Checks if all parameters have successfully been loaded,
+  /// and yields a loaded state if so.
+  void _checkAndEmitLoadedState(Emitter<StartTabState> emit) {
+    if (state is StartTabLoading) {
+      StartTabLoading stateLoading = state as StartTabLoading;
+      if (stateLoading.settings != null &&
+          stateLoading.position != null &&
+          stateLoading.itineraries != null) {
+        emit(StartTabLoaded(
+          settings: stateLoading.settings!,
+          position: stateLoading.position!,
+          itineraries: stateLoading.itineraries!,
+        ));
+      }
     }
   }
 }

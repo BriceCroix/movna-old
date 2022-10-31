@@ -12,26 +12,33 @@ class OngoingActivityInitial extends OngoingActivityState {
 }
 
 class OngoingActivityLoading extends OngoingActivityState {
-  const OngoingActivityLoading({this.settings, this.trackPoint});
+  const OngoingActivityLoading(
+      {this.ongoingActivitySettings, this.settings, this.trackPoint});
 
   /// Settings of the app.
   final Settings? settings;
+
+  /// Settings og the current ongoing activity.
+  final OngoingActivitySettings? ongoingActivitySettings;
 
   /// Current TrackPoint
   final TrackPoint? trackPoint;
 
   OngoingActivityLoading copyWith({
     Settings? settings,
+    OngoingActivitySettings? ongoingActivitySettings,
     TrackPoint? trackPoint,
   }) {
     return OngoingActivityLoading(
       settings: settings ?? this.settings,
+      ongoingActivitySettings:
+          ongoingActivitySettings ?? this.ongoingActivitySettings,
       trackPoint: trackPoint ?? this.trackPoint,
     );
   }
 
   @override
-  List<Object?> get props => [settings, trackPoint];
+  List<Object?> get props => [settings, ongoingActivitySettings, trackPoint];
 }
 
 class OngoingActivityLoaded extends OngoingActivityState {

@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 import 'package:movna/core/domain/entities/activity.dart';
+import 'package:movna/core/domain/entities/ongoing_activity_settings.dart';
 import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/domain/usecases/get_settings.dart';
@@ -13,6 +14,7 @@ import 'package:movna/features/ongoing_activity/data/models/chronometer.dart';
 import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point.dart';
 import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point_stream.dart';
+import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_page.dart';
 
 part 'ongoing_activity_event.dart';
 
@@ -58,6 +60,7 @@ class OngoingActivityBloc
     on<StartEvent>(_onStartEvent);
     on<NewTrackPointEvent>(_onNewTrackPointEvent);
     on<TimeIntervalElapsedEvent>(_onTimeIntervalElapsedEvent);
+    on<ParametersGiven>(_onParametersGiven);
 
     _getSettings().then((settings) => add(SettingsLoaded(settings: settings)));
     _requestTrackPoint();
@@ -75,24 +78,42 @@ class OngoingActivityBloc
     return super.close();
   }
 
+  void _onParametersGiven(
+    ParametersGiven event,
+    Emitter<OngoingActivityState> emit,
+  ) {
+    final params = event.pageParams;
+    if (state is OngoingActivityInitial) {
+      emit(OngoingActivityLoading(
+          ongoingActivitySettings: params.ongoingActivitySettings));
+    } else if (state is OngoingActivityLoading) {
+      final stateLoading = state as OngoingActivityLoading;
+      emit(stateLoading.copyWith(
+          ongoingActivitySettings: params.ongoingActivitySettings));
+      _checkLoadingState(emit);
+    }
+  }
+
   void _onSettingsLoaded(
-      SettingsLoaded event, Emitter<OngoingActivityState> emit) {
-    final Settings settings = event.settings;
+    SettingsLoaded event,
+    Emitter<OngoingActivityState> emit,
+  ) {
+    final settings = event.settings;
     if (state is OngoingActivityInitial) {
       emit(OngoingActivityLoading(settings: settings));
     } else if (state is OngoingActivityLoading) {
       OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
       emit(stateLoading.copyWith(settings: settings));
-      add(StartEvent());
-      // If more than two fields to load in the future, add an if to check
-      // that all fields are loaded before adding start event
+      _checkLoadingState(emit);
     }
   }
 
   void _onMapReadyEvent(
-      MapReadyEvent event, Emitter<OngoingActivityState> emit) {
+    MapReadyEvent event,
+    Emitter<OngoingActivityState> emit,
+  ) {
     if (state is OngoingActivityLoaded) {
-      OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
+      final stateLoaded = state as OngoingActivityLoaded;
       emit(stateLoaded.copyWith(isMapReady: true));
     }
   }
@@ -156,7 +177,7 @@ class OngoingActivityBloc
 
   void _onStartEvent(StartEvent event, Emitter<OngoingActivityState> emit) {
     if (state is OngoingActivityLoading) {
-      OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
+      final stateLoading = state as OngoingActivityLoading;
       _durationSubscription?.cancel();
       _durationSubscription = Chronometer(value: Duration.zero).tick().listen(
           (duration) => add(TimeIntervalElapsedEvent(duration: duration)));
@@ -164,10 +185,12 @@ class OngoingActivityBloc
         OngoingActivityLoaded(
           settings: stateLoading.settings!,
           activity: Activity(
-              startTime: stateLoading.trackPoint!.dateTime!,
-              stopTime: DateTime(0),
-              sport: stateLoading.settings!.sport,
-              trackPoints: <TrackPoint>[stateLoading.trackPoint!]),
+            startTime: stateLoading.trackPoint!.dateTime!,
+            stopTime: DateTime(0),
+            sport: stateLoading.settings!.sport,
+            trackPoints: <TrackPoint>[stateLoading.trackPoint!],
+            itinerary: stateLoading.ongoingActivitySettings!.itinerary,
+          ),
           isLocked: true,
           pauseStatus: PauseStatus.running,
           lastTrackPoint: stateLoading.trackPoint!,
@@ -196,9 +219,7 @@ class OngoingActivityBloc
     } else if (state is OngoingActivityLoading) {
       OngoingActivityLoading stateLoading = state as OngoingActivityLoading;
       emit(stateLoading.copyWith(trackPoint: event.trackPoint));
-      add(StartEvent());
-      // If more than two fields to load in the future, add an if to check
-      // that all fields are loaded before adding start event
+      _checkLoadingState(emit);
     } else if (state is OngoingActivityLoaded) {
       OngoingActivityLoaded stateLoaded = state as OngoingActivityLoaded;
 
@@ -295,5 +316,17 @@ class OngoingActivityBloc
   void _requestTrackPoint() {
     _getTrackPoint()
         .then((trackPoint) => add(NewTrackPointEvent(trackPoint: trackPoint)));
+  }
+
+  /// Checks if all the fields of loading state are loaded to add start event.
+  void _checkLoadingState(Emitter<OngoingActivityState> emit) {
+    if (state is OngoingActivityLoading) {
+      final stateLoading = state as OngoingActivityLoading;
+      if (stateLoading.ongoingActivitySettings != null &&
+          stateLoading.settings != null &&
+          stateLoading.trackPoint != null) {
+        add(StartEvent());
+      }
+    }
   }
 }

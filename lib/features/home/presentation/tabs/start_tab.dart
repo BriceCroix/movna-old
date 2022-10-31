@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:movna/core/domain/entities/itinerary.dart';
 import 'package:movna/core/domain/entities/sport.dart';
 import 'package:movna/core/injection.dart';
 import 'package:movna/core/presentation/router/router.dart';
@@ -11,6 +12,7 @@ import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/home/presentation/bloc/start_tab_bloc.dart';
+import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_page.dart';
 
 class StartTab extends StatelessWidget {
   const StartTab({super.key});
@@ -32,10 +34,13 @@ class _StartTabView extends StatelessWidget {
   Widget _buildStartBottomSheet(BuildContext context) {
     return BlocBuilder<StartTabBloc, StartTabState>(
       builder: (context, state) {
-        state = state as StartTabLoaded;
+        if (state is! StartTabLoaded) {
+          return const MovnaLoadingSpinner();
+        }
         return Container(
           padding: const EdgeInsets.all(globalPadding),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -86,9 +91,42 @@ class _StartTabView extends StatelessWidget {
                   ),
                 ],
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(AppLocalizations.of(context)!.itinerary),
+                  // TODO : fix size of dropdown button to accommodate for long itineraries name
+                  const SizedBox(width: globalPadding),
+                  DropdownButton<Itinerary>(
+                    value: state.ongoingActivitySettings.itinerary,
+                    onChanged: (Itinerary? value) {
+                      context
+                          .read<StartTabBloc>()
+                          .add(ItinerarySettingChanged(itinerary: value));
+                    },
+                    items: [
+                      DropdownMenuItem<Itinerary>(
+                        value: null,
+                        child: Text(AppLocalizations.of(context)!.none),
+                      ),
+                      ...state.itineraries
+                          .map<DropdownMenuItem<Itinerary>>((value) {
+                        return DropdownMenuItem<Itinerary>(
+                          value: value,
+                          child: Text(value.name),
+                        );
+                      }),
+                    ],
+                  )
+                ],
+              ),
               ElevatedButton.icon(
                 onPressed: () {
-                  navigateTo(RouteName.ongoingActivity);
+                  navigateTo(
+                    RouteName.ongoingActivity,
+                    OngoingActivityPageParams(
+                        ongoingActivitySettings: state.ongoingActivitySettings),
+                  );
                 },
                 icon: const Icon(Icons.play_arrow_rounded),
                 label: Text(AppLocalizations.of(context)!.start),
@@ -123,12 +161,31 @@ class _StartTabView extends StatelessWidget {
                   children: [
                     // Tile layer
                     getOpenStreetMapTileLayer(),
+                    // Itinerary layer
+                    BlocBuilder<StartTabBloc, StartTabState>(
+                      buildWhen: (previous, current) =>
+                          (previous is StartTabLoaded &&
+                              current is StartTabLoaded &&
+                              previous.ongoingActivitySettings.itinerary !=
+                                  current.ongoingActivitySettings.itinerary),
+                      builder: (context, state) {
+                        final stateLoaded = state as StartTabLoaded;
+                        return stateLoaded.ongoingActivitySettings.itinerary !=
+                                null
+                            ? getItineraryPolylineLayer(
+                                stateLoaded.ongoingActivitySettings.itinerary!)
+                            : const SizedBox();
+                      },
+                    ),
                     // Marker Layer
                     BlocBuilder<StartTabBloc, StartTabState>(
+                      buildWhen: (previous, current) =>
+                          (previous is StartTabLoaded &&
+                              current is StartTabLoaded &&
+                              previous.position != current.position),
                       builder: (context, state) {
-                        StartTabLoaded stateLoaded = (state as StartTabLoaded);
-                        return getPathMarkerLayer(
-                            user: stateLoaded.position);
+                        final stateLoaded = state as StartTabLoaded;
+                        return getPathMarkerLayer(user: stateLoaded.position);
                       },
                     ),
                   ],
@@ -147,7 +204,6 @@ class _StartTabView extends StatelessWidget {
                       },
                     );
                   },
-                  heroTag: 'to_on_going_activity',
                   child: const Icon(Icons.play_arrow_rounded),
                 ),
               );

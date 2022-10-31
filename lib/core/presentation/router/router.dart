@@ -40,8 +40,13 @@ Route generateRoute(RouteSettings settings) {
       case RouteName.home:
         return MaterialPageRoute(builder: (context) => const HomePage());
       case RouteName.ongoingActivity:
-        return MaterialPageRoute(
-            builder: (context) => const OngoingActivityPage());
+        if (settings.arguments != null &&
+            settings.arguments is OngoingActivityPageParams) {
+          final params = settings.arguments! as OngoingActivityPageParams;
+          return MaterialPageRoute(
+              builder: (context) => OngoingActivityPage(params: params));
+        }
+        break;
       case RouteName.pastActivity:
         if (settings.arguments != null &&
             settings.arguments is PastActivityPageParams) {
