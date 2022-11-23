@@ -11,7 +11,7 @@ import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:movna/features/past_activity/presentation/blocs/past_activity_bloc.dart';
+import 'package:movna/features/activities_management/presentation/blocs/past_activity_bloc.dart';
 
 /// Initial parameters of the page, only used to initialize the state.
 class PastActivityPageParams {

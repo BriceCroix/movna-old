@@ -1,3 +1,4 @@
+import 'package:movna/core/domain/entities/activities_filter.dart';
 import 'package:movna/core/typedefs.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 
@@ -8,7 +9,6 @@ abstract class ActivitiesRepository {
   /// Delete an [activity] from disk.
   Future<ErrorState> deleteActivity(Activity activity);
 
-  /// Get all activities stored on disk. With a maximum of [maxCount] elements.
-  /// Activities are sorted from latest to oldest.
-  Future<List<Activity>> getActivities([int? maxCount]);
+  /// Get stored used activities according to given [filter].
+  Future<List<Activity>> getActivities(ActivitiesFilter? filter);
 }

@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:movna/core/data/datasources/local/database_source.dart';
 import 'package:movna/core/data/models/activity_model.dart';
+import 'package:movna/core/domain/entities/activities_filter.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/repositories/activities_repository.dart';
 import 'package:movna/core/typedefs.dart';
@@ -15,14 +16,14 @@ class ActivitiesRepositoryImpl implements ActivitiesRepository {
   });
 
   @override
-  Future<List<Activity>> getActivities([int? maxCount]) async {
+  Future<List<Activity>> getActivities([ActivitiesFilter? filter]) async {
     try {
-      List<ActivityModel> models = await dataBaseSource.getActivities(maxCount);
+      List<ActivityModel> models = await dataBaseSource.getActivities(filter);
 
       return models.map((e) => e.toActivity()).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return [];
     }
   }
@@ -35,9 +36,9 @@ class ActivitiesRepositoryImpl implements ActivitiesRepository {
       await dataBaseSource.saveActivityToDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }
@@ -50,9 +51,9 @@ class ActivitiesRepositoryImpl implements ActivitiesRepository {
       await dataBaseSource.removeActivityFromDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }

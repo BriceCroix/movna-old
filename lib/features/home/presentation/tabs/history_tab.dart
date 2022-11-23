@@ -6,9 +6,9 @@ import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/presentation/router/router.dart';
 import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/features/home/presentation/bloc/history_tab_bloc.dart';
-import 'package:movna/features/home/presentation/widgets/activity_card.dart';
+import 'package:movna/core/presentation/widgets/activity_card.dart';
 import 'package:movna/core/presentation/widgets/titled_box.dart';
-import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
+import 'package:movna/features/activities_management/presentation/widgets/past_activity_page.dart';
 
 class HistoryTab extends StatelessWidget {
   const HistoryTab({Key? key}) : super(key: key);
@@ -34,7 +34,7 @@ class _HistoryTabView extends StatelessWidget {
           child: TitledBox(
             title: AppLocalizations.of(context)!.activities,
             onMorePressed: () {
-              //TODO : Navigator push pastActivitiesPage
+              navigateTo(RouteName.activitiesList);
             },
             child: Expanded(
               child: BlocBuilder<HistoryTabBloc, HistoryTabState>(

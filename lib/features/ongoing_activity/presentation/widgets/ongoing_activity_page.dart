@@ -14,7 +14,7 @@ import 'package:movna/core/presentation/widgets/movna_map_layers.dart';
 import 'package:movna/core/presentation/widgets/presentation_constants.dart';
 import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_measure.dart';
-import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
+import 'package:movna/features/activities_management/presentation/widgets/past_activity_page.dart';
 import 'package:wakelock/wakelock.dart';
 
 import '../blocs/ongoing_activity_bloc.dart';

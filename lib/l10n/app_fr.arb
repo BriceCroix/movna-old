@@ -109,5 +109,12 @@
 
     "defaultItineraryName": "Itineraire du {date}",
 
-    "none": "Aucun"
+    "none": "Aucun",
+    "all": "Tous",
+    "reset": "Réinitialiser",
+
+    "distanceMin": "Distance min",
+    "distanceMax": "Distance max",
+    "dateFrom": "Du",
+    "dateTo": "au"
 }

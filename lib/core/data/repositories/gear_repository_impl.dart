@@ -18,9 +18,9 @@ class GearRepositoryImpl implements GearRepository {
       List<GearModel> models = await dataBaseSource.getGear(maxCount);
 
       return models.map((e) => e.toGear()).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return [];
     }
   }
@@ -33,9 +33,9 @@ class GearRepositoryImpl implements GearRepository {
       await dataBaseSource.saveGearToDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }
@@ -48,9 +48,9 @@ class GearRepositoryImpl implements GearRepository {
       await dataBaseSource.removeGearFromDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }
@@ -61,9 +61,9 @@ class GearRepositoryImpl implements GearRepository {
       int count = await dataBaseSource.getGearCount();
 
       return count;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return -1;
     }
   }

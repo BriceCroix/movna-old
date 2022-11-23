@@ -140,5 +140,12 @@
         }
     },
 
-    "none": "None"
+    "none": "None",
+    "all": "All",
+    "reset": "Reset",
+
+    "distanceMin": "Min distance",
+    "distanceMax": "Max distance",
+    "dateFrom": "From",
+    "dateTo": "To"
 }

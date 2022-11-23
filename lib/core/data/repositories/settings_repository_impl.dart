@@ -16,9 +16,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   Future<Settings> getSettings() async {
     try {
       return (await settingsSource.getSettings()).toSettings();
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       // return default settings
       return const SettingsModel().toSettings();
     }
@@ -29,9 +29,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
     try {
       settingsSource.saveSettings(SettingsModel.fromSettings(settings));
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }

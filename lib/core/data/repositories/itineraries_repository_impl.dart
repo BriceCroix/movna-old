@@ -19,9 +19,9 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
       List<ItineraryModel> models = await dataBaseSource.getItineraries(maxCount);
 
       return models.map((e) => e.toItinerary()).toList();
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return [];
     }
   }
@@ -34,9 +34,9 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
       await dataBaseSource.saveItineraryToDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }
@@ -49,9 +49,9 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
       await dataBaseSource.removeItineraryFromDatabase(model);
 
       return false;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return true;
     }
   }
@@ -62,9 +62,9 @@ class ItinerariesRepositoryImpl implements ItinerariesRepository {
       int count = await dataBaseSource.getItinerariesCount();
 
       return count;
-    } catch (e) {
+    } catch (e, stackTrace) {
       Logger logger = Logger();
-      logger.e(e);
+      logger.e(e.toString(), e, stackTrace);
       return -1;
     }
   }

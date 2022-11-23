@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:movna/core/domain/entities/activities_filter.dart';
 import 'package:movna/core/domain/entities/activity.dart';
 import 'package:movna/core/domain/usecases/get_activities.dart';
 
@@ -35,7 +36,7 @@ class HistoryTabBloc extends Bloc<HistoryTabEvent, HistoryTabState> {
 
   void _onRefreshActivities(
       RefreshActivities event, Emitter<HistoryTabState> emit) {
-    getActivities(_activitiesCount)
+    getActivities(const ActivitiesFilter(maxCount: _activitiesCount))
         .then((value) => add(ActivitiesLoaded(value)));
   }
 }

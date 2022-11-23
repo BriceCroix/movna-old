@@ -4,6 +4,8 @@ import 'package:isar/isar.dart';
 import 'package:movna/core/data/models/activity_model.dart';
 import 'package:movna/core/data/models/gear_model.dart';
 import 'package:movna/core/data/models/itinerary_model.dart';
+import 'package:movna/core/data/models/sport_converter.dart';
+import 'package:movna/core/domain/entities/activities_filter.dart';
 import 'package:path_provider/path_provider.dart';
 
 @Injectable()
@@ -12,6 +14,7 @@ class DataBaseSource {
   Future<Isar> _openIsar() async {
     Directory dir = await getApplicationDocumentsDirectory();
 
+    // TODO : register this call as getIt singleton
     return Isar.open(
       schemas: [ActivityModelSchema, GearModelSchema, ItineraryModelSchema],
       directory: dir.path,
@@ -19,16 +22,64 @@ class DataBaseSource {
   }
 
   /// Returns activity models sorted by start time.
-  Future<List<ActivityModel>> getActivities([int? maxCount]) async {
+  Future<List<ActivityModel>> getActivities([ActivitiesFilter? filter]) async {
     final isar = await _openIsar();
 
-    Future<List<ActivityModel>> res = maxCount != null
-        ? isar.activityModels
-            .where()
-            .sortByStartTimeDesc()
-            .limit(maxCount)
-            .findAll()
-        : isar.activityModels.where().sortByStartTimeDesc().findAll();
+    List<WhereClause> whereClauses = [];
+    List<FilterCondition> filterConditions = [];
+
+    if (filter != null) {
+      if (filter.sport != null) {
+        filterConditions.add(FilterCondition(
+          type: ConditionType.eq,
+          property: ActivityModel.propertySportName,
+          value: const SportConverter().toIsar(filter.sport!),
+        ));
+      }
+      if (filter.dateTimeFrom != null) {
+        filterConditions.add(FilterCondition(
+          type: ConditionType.gt,
+          property: ActivityModel.propertyStartTimeName,
+          value: filter.dateTimeFrom,
+        ));
+      }
+      if (filter.dateTimeTo != null) {
+        filterConditions.add(FilterCondition(
+          type: ConditionType.lt,
+          property: ActivityModel.propertyStopTimeName,
+          value: filter.dateTimeTo,
+        ));
+      }
+      if (filter.distanceFrom != null) {
+        filterConditions.add(FilterCondition(
+          type: ConditionType.gt,
+          property: ActivityModel.propertyDistanceInMetersName,
+          value: filter.distanceFrom,
+        ));
+      }
+      if (filter.distanceTo != null) {
+        filterConditions.add(FilterCondition(
+          type: ConditionType.lt,
+          property: ActivityModel.propertyDistanceInMetersName,
+          value: filter.distanceTo,
+        ));
+      }
+    }
+
+    final query = isar.activityModels.buildQuery<ActivityModel>(
+      whereClauses: whereClauses,
+      filter: FilterGroup.and(filterConditions),
+      sortBy: [
+        const SortProperty(
+          property: ActivityModel.propertyStartTimeName,
+          sort: Sort.desc,
+        )
+      ],
+      limit: filter?.maxCount,
+      offset: 0,
+    );
+
+    final res = query.findAll();
 
     isar.close();
 

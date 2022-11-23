@@ -10,8 +10,8 @@ import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/domain/usecases/get_position.dart';
 import 'package:movna/core/domain/usecases/get_position_stream.dart';
 import 'package:movna/core/domain/usecases/save_activity.dart';
-import 'package:movna/features/past_activity/domain/usecases/delete_activity.dart';
-import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
+import 'package:movna/features/activities_management/domain/usecases/delete_activity.dart';
+import 'package:movna/features/activities_management/presentation/widgets/past_activity_page.dart';
 
 part 'past_activity_event.dart';
 

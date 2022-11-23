@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/features/activities_management/presentation/widgets/activities_list_page.dart';
 import 'package:movna/features/gear_management/presentation/widgets/gear_list_page.dart';
 import 'package:movna/features/gear_management/presentation/widgets/user_gear_page.dart';
 import 'package:movna/features/home/presentation/widgets/home_page.dart';
 import 'package:movna/features/itineraries_management/presentation/widgets/itineraries_list_page.dart';
 import 'package:movna/features/itineraries_management/presentation/widgets/user_itinerary_page.dart';
 import 'package:movna/features/ongoing_activity/presentation/widgets/ongoing_activity_page.dart';
-import 'package:movna/features/past_activity/presentation/widgets/past_activity_page.dart';
+import 'package:movna/features/activities_management/presentation/widgets/past_activity_page.dart';
 
 enum RouteName {
   home,
   ongoingActivity,
+  activitiesList,
   pastActivity,
   gearList,
   userGear,
@@ -47,6 +49,8 @@ Route generateRoute(RouteSettings settings) {
               builder: (context) => OngoingActivityPage(params: params));
         }
         break;
+      case RouteName.activitiesList:
+        return MaterialPageRoute(builder: (context) => const ActivitiesListPage());
       case RouteName.pastActivity:
         if (settings.arguments != null &&
             settings.arguments is PastActivityPageParams) {
