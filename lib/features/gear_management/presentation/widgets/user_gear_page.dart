@@ -48,51 +48,44 @@ class _UserGearView extends StatelessWidget {
           Navigator.of(context).pop();
         }
       },
-      buildWhen: (previous, current) => current is! UserGearBusy,
       builder: (context, state) {
-        return WillPopScope(
-          onWillPop: () => Future.value(state is! UserGearBusy),
-          child: Scaffold(
-            appBar: AppBar(
-              actions: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(right: globalPadding),
-                  child: GestureDetector(
-                    onTap: () {
-                      showDialog<void>(
-                        context: context,
-                        barrierDismissible: false, // user must tap button!
-                        builder: (BuildContext newContext) =>
-                            BlocProvider.value(
-                          value: context.read<UserGearBloc>(),
-                          child: DeleteAlertDialog(
-                            onConfirm: () {
-                              context
-                                  .read<UserGearBloc>()
-                                  .add(DeleteGearEvent());
-                              Navigator.of(context).pop();
-                            },
-                            onCancel: () => Navigator.of(context).pop(),
-                          ),
+        return Scaffold(
+          appBar: AppBar(
+            actions: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(right: globalPadding),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog<void>(
+                      context: context,
+                      barrierDismissible: false, // user must tap button!
+                      builder: (BuildContext newContext) => BlocProvider.value(
+                        value: context.read<UserGearBloc>(),
+                        child: DeleteAlertDialog(
+                          onConfirm: () {
+                            context.read<UserGearBloc>().add(DeleteGearEvent());
+                            Navigator.of(context).pop();
+                          },
+                          onCancel: () => Navigator.of(context).pop(),
                         ),
-                      );
-                    },
-                    child: const Icon(Icons.delete_rounded),
-                  ),
-                )
-              ],
-            ),
-            body: Center(
-              child: state is UserGearLoaded
-                  ? _buildGearProperties(context, state)
-                  : const MovnaLoadingSpinner(),
-            ),
-            floatingActionButton: state is UserGearLoaded
-                ? (state.editMode
-                    ? _buildValidateButton(context)
-                    : _buildEditButton(context))
-                : const SizedBox(),
+                      ),
+                    );
+                  },
+                  child: const Icon(Icons.delete_rounded),
+                ),
+              )
+            ],
           ),
+          body: Center(
+            child: state is UserGearLoaded
+                ? _buildGearProperties(context, state)
+                : const MovnaLoadingSpinner(),
+          ),
+          floatingActionButton: state is UserGearLoaded
+              ? (state.editMode
+                  ? _buildValidateButton(context)
+                  : _buildEditButton(context))
+              : const SizedBox(),
         );
       },
     );
@@ -114,6 +107,7 @@ class _UserGearView extends StatelessWidget {
 
   Widget _buildGearProperties(BuildContext context, UserGearLoaded state) {
     const double textFieldsWidth = 120;
+
     return Container(
       padding: const EdgeInsets.all(globalPadding),
       child: Column(
@@ -122,24 +116,16 @@ class _UserGearView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(AppLocalizations.of(context)!.name),
-              AnimatedSwitcher(
-                duration: globalAnimationDuration,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return ScaleTransition(scale: animation, child: child);
-                },
-                child: state.editMode
-                    ? SizedBox(
-                        width: textFieldsWidth,
-                        child: TextField(
-                          decoration: const InputDecoration(isDense: true),
-                          controller: TextEditingController(
-                              text: state.gearEdited.name),
-                          onSubmitted: (value) => context
-                              .read<UserGearBloc>()
-                              .add(GearNameEdited(name: value)),
-                        ),
-                      )
-                    : Text(state.gear.name),
+              SizedBox(
+                width: textFieldsWidth,
+                child: TextField(
+                  readOnly: !state.editMode,
+                  decoration: const InputDecoration(isDense: true),
+                  controller: TextEditingController(text: state.gear.name),
+                  onSubmitted: (value) => context
+                      .read<UserGearBloc>()
+                      .add(GearNameChanged(name: value)),
+                ),
               ),
             ],
           ),
@@ -148,32 +134,27 @@ class _UserGearView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(AppLocalizations.of(context)!.gearType),
-              AnimatedSwitcher(
-                duration: globalAnimationDuration,
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return ScaleTransition(scale: animation, child: child);
-                },
-                child: state.editMode
-                    ? DropdownButton<GearType>(
-                        value: state.gearEdited.gearType,
-                        onChanged: (GearType? value) {
-                          if (value != null) {
-                            context
-                                .read<UserGearBloc>()
-                                .add(GearTypeEdited(gearType: value));
-                          }
-                        },
-                        items: GearType.values
-                            .map<DropdownMenuItem<GearType>>(
-                                (GearType value) => DropdownMenuItem<GearType>(
-                                      value: value,
-                                      child: Text(
-                                        translateGearType(value, context),
-                                      ),
-                                    ))
-                            .toList(),
-                      )
-                    : Text(translateGearType(state.gear.gearType, context)),
+              DropdownButton<GearType>(
+                value: state.gear.gearType,
+                // DropDownButton is disabled with a null callback
+                onChanged: state.editMode
+                    ? (GearType? value) {
+                        if (value != null) {
+                          context
+                              .read<UserGearBloc>()
+                              .add(GearTypeChanged(gearType: value));
+                        }
+                      }
+                    : null,
+                items: GearType.values
+                    .map<DropdownMenuItem<GearType>>(
+                        (GearType value) => DropdownMenuItem<GearType>(
+                              value: value,
+                              child: Text(
+                                translateGearType(value, context),
+                              ),
+                            ))
+                    .toList(),
               ),
             ],
           ),

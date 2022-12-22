@@ -13,18 +13,22 @@ class ParametersGiven extends UserGearEvent {
   final UserGearPageParams params;
 }
 
+/// Enable edit mode.
 class EditModeEnabled extends UserGearEvent {}
 
+/// Disable edit mode and confirm changes.
 class EditDone extends UserGearEvent {}
 
-class GearNameEdited extends UserGearEvent {
-  const GearNameEdited({required this.name});
+/// Change the gear name.
+class GearNameChanged extends UserGearEvent {
+  const GearNameChanged({required this.name});
 
   final String name;
 }
 
-class GearTypeEdited extends UserGearEvent {
-  const GearTypeEdited({required this.gearType});
+/// Change the gear type.
+class GearTypeChanged extends UserGearEvent {
+  const GearTypeChanged({required this.gearType});
 
   final GearType gearType;
 }
