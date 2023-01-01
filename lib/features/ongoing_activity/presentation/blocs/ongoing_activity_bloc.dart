@@ -9,7 +9,6 @@ import 'package:movna/core/domain/entities/settings.dart';
 import 'package:movna/core/domain/entities/track_point.dart';
 import 'package:movna/core/domain/usecases/get_settings.dart';
 import 'package:movna/core/domain/usecases/save_activity.dart';
-import 'package:movna/core/domain/usecases/save_settings.dart';
 import 'package:movna/features/ongoing_activity/data/models/chronometer.dart';
 import 'package:movna/features/ongoing_activity/domain/entities/pause_status.dart';
 import 'package:movna/features/ongoing_activity/domain/usecases/get_track_point.dart';
@@ -25,7 +24,6 @@ class OngoingActivityBloc
     extends Bloc<OngoingActivityEvent, OngoingActivityState> {
   final SaveActivity _saveActivity;
   final GetSettings _getSettings;
-  final SaveSettings _saveSettings;
   final GetTrackPoint _getTrackPoint;
   final GetTrackPointStream _getTrackPointStream;
 
@@ -47,7 +45,6 @@ class OngoingActivityBloc
   OngoingActivityBloc(
     this._saveActivity,
     this._getSettings,
-    this._saveSettings,
     this._getTrackPoint,
     this._getTrackPointStream,
   ) : super(const OngoingActivityInitial()) {
@@ -129,11 +126,11 @@ class OngoingActivityBloc
         _cancelAutomaticLockTimer();
         _cancelAutomaticPauseTimer();
       } else {
-        // On resume, add a new trackPoint to activity
+        // On resume, add a new trackPoint segment to activity
         Activity newActivity = stateLoaded.activity.copyWith(
-          trackPoints: [
-            ...stateLoaded.activity.trackPoints,
-            stateLoaded.lastTrackPoint
+          trackPointsSegments: [
+            ...stateLoaded.activity.trackPointsSegments,
+            [stateLoaded.lastTrackPoint]
           ],
         );
         newState = newState.copyWith(isLocked: true, activity: newActivity);
@@ -188,7 +185,9 @@ class OngoingActivityBloc
             startTime: stateLoading.trackPoint!.dateTime!,
             stopTime: DateTime(0),
             sport: stateLoading.settings!.sport,
-            trackPoints: <TrackPoint>[stateLoading.trackPoint!],
+            trackPointsSegments: <TrackPointsSegment>[
+              [stateLoading.trackPoint!]
+            ],
             itinerary: stateLoading.ongoingActivitySettings!.itinerary,
           ),
           isLocked: true,
@@ -258,7 +257,12 @@ class OngoingActivityBloc
         double totalDistance =
             stateLoaded.activity.distanceInMeters + lastDistance;
         newActivity = stateLoaded.activity.copyWith(
-          trackPoints: [...stateLoaded.activity.trackPoints, newTrackPoint],
+          // Add new trackpoint to last segment
+          trackPointsSegments: [
+            ...stateLoaded.activity.trackPointsSegments.sublist(
+                0, stateLoaded.activity.trackPointsSegments.length - 1),
+            [...stateLoaded.activity.trackPointsSegments.last, newTrackPoint]
+          ],
           distanceInMeters: totalDistance,
         );
       } else {
