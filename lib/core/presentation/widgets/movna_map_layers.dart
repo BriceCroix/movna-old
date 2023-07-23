@@ -37,7 +37,6 @@ PolylineLayer getItineraryPolylineLayer(Itinerary itinerary) => PolylineLayer(
 /// Creates a FlutterMap polyline layer to display the activity path over its
 /// itinerary path if available.
 PolylineLayer getActivityPolylineLayer({required Activity activity}) {
-  const double strokeWidth = 4;
   List<Polyline> polylines = [];
 
   if (activity.itinerary != null) {
@@ -45,41 +44,18 @@ PolylineLayer getActivityPolylineLayer({required Activity activity}) {
   }
 
   // Create activity path polyline
-  for (var iSegment = 0;
-      iSegment < activity.trackPointsSegments.length;
-      iSegment++) {
-    // Actual path
-    final segment = activity.trackPointsSegments[iSegment];
-    List<LatLng> activityPoints = [];
-    for (TrackPoint t in segment) {
-      if (t.position != null) {
-        activityPoints.add(LatLng(
-            t.position!.latitudeInDegrees, t.position!.longitudeInDegrees));
-      }
-    }
-    polylines.add(Polyline(
-      points: activityPoints,
-      color: userPositionColor,
-      strokeWidth: strokeWidth,
-    ));
-
-    // Pause path
-    if (iSegment < activity.trackPointsSegments.length - 1) {
-      final nextSegment = activity.trackPointsSegments[iSegment + 1];
-      if (segment.last.position != null && nextSegment.first.position != null) {
-        polylines.add(Polyline(
-          points: [
-            LatLng(segment.last.position!.latitudeInDegrees,
-                segment.last.position!.longitudeInDegrees),
-            LatLng(nextSegment.first.position!.latitudeInDegrees,
-                nextSegment.first.position!.longitudeInDegrees),
-          ],
-          color: pauseColor,
-          strokeWidth: strokeWidth,
-        ));
-      }
+  List<LatLng> activityPoints = [];
+  for (TrackPoint t in activity.trackPoints) {
+    if (t.position != null) {
+      activityPoints.add(LatLng(
+          t.position!.latitudeInDegrees, t.position!.longitudeInDegrees));
     }
   }
+  polylines.add(Polyline(
+    points: activityPoints,
+    color: userPositionColor,
+    strokeWidth: 4,
+  ));
 
   return PolylineLayer(
     polylineCulling: false,
