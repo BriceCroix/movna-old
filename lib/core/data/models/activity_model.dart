@@ -2,7 +2,7 @@ import 'package:isar/isar.dart';
 import 'package:movna/core/data/models/duration_converter.dart';
 import 'package:movna/core/data/models/gear_model.dart';
 import 'package:movna/core/data/models/itinerary_model.dart';
-import 'package:movna/core/data/models/list_track_point_model_converter.dart';
+import 'package:movna/core/data/models/list_list_track_point_model_converter.dart';
 import 'package:movna/core/data/models/sport_converter.dart';
 import 'package:movna/core/data/models/track_point_model.dart';
 import 'package:movna/core/domain/entities/activity.dart';
@@ -62,10 +62,10 @@ class ActivityModel {
   @Name(propertyMaxSpeedInKilometersPerHourName)
   double maxSpeedInKilometersPerHour;
 
-  static const propertyTrackPointsName = 'trackPoints';
-  @ListTrackPointModelConverter()
-  @Name('trackPoints')
-  List<TrackPointModel> trackPoints;
+  static const propertyTrackPointsName = 'trackPointsSegments';
+  @ListListTrackPointModelConverter()
+  @Name(propertyTrackPointsName)
+  List<List<TrackPointModel>> trackPointsSegments;
 
   // Reference to other database tables
   static const propertyItineraryName = 'itinerary';
@@ -85,7 +85,7 @@ class ActivityModel {
     required this.sport,
     required this.distanceInMeters,
     required this.maxSpeedInKilometersPerHour,
-    required this.trackPoints,
+    required this.trackPointsSegments,
   }) : id = startTime.microsecondsSinceEpoch;
 
   static ActivityModel fromActivity(Activity activity) {
@@ -97,8 +97,9 @@ class ActivityModel {
       sport: activity.sport,
       distanceInMeters: activity.distanceInMeters,
       maxSpeedInKilometersPerHour: activity.maxSpeedInKilometersPerHour,
-      trackPoints: activity.trackPoints
-          .map((e) => TrackPointModel.fromTrackPoint(e))
+      trackPointsSegments: activity.trackPointsSegments
+          .map((segment) =>
+              segment.map((e) => TrackPointModel.fromTrackPoint(e)).toList())
           .toList(),
       name: activity.name,
     );
@@ -123,7 +124,9 @@ class ActivityModel {
       gear:
           (gear.isAttached && gear.value != null) ? gear.value!.toGear() : null,
       maxSpeedInKilometersPerHour: maxSpeedInKilometersPerHour,
-      trackPoints: trackPoints.map((e) => e.toTrackPoint()).toList(),
+      trackPointsSegments: trackPointsSegments
+          .map((segment) => segment.map((e) => e.toTrackPoint()).toList())
+          .toList(),
       itinerary: (itinerary.isAttached && itinerary.value != null)
           ? itinerary.value!.toItinerary()
           : null,

@@ -6,14 +6,16 @@ import 'package:movna/core/domain/entities/sport.dart';
 
 part 'activity.freezed.dart';
 
+typedef TrackPointsSegment = List<TrackPoint>;
+
 @freezed
 class Activity with _$Activity {
   const Activity._();
 
   factory Activity({
-    /// All the trackpoints of this activity.
-    //TODO : replace by List<List<TrackPoint>> in order to know when pauses occurred
-    @Default([]) List<TrackPoint> trackPoints,
+    /// All the trackpoints segments of this activity,
+    /// two segments are separated by a pause.
+    @Default([]) List<TrackPointsSegment> trackPointsSegments,
 
     /// Optional name of this activity.
     String? name,
@@ -53,4 +55,7 @@ class Activity with _$Activity {
         ? 3600 * 1e-3 * distanceInMeters / duration.inSeconds
         : 0;
   }
+
+  /// All trackpoints of this activity.
+  List<TrackPoint> get trackPoints => trackPointsSegments.expand((element) => element).toList();
 }
