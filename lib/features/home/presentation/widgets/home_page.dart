@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:movna/core/injection.dart';
+import 'package:movna/core/permissions.dart';
+import 'package:movna/core/presentation/widgets/movna_loading_spinner.dart';
 import 'package:movna/features/home/presentation/bloc/home_bloc.dart';
 import 'package:movna/features/home/presentation/tabs/history_tab.dart';
 import 'package:movna/features/home/presentation/tabs/profile_tab.dart';
@@ -12,9 +14,30 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => injector<HomeBloc>(),
-      child: const _HomeView(),
+    return FutureBuilder(
+      future: requestPermissions(),
+      builder: (context, snapshot)
+    {
+      if (snapshot.connectionState != ConnectionState.done) {
+        // TODO "Please grant permissions"
+        return const MovnaLoadingSpinner();
+      } else {
+        if (snapshot.hasError) {
+          // TODO : No idea what to do here
+          return const MovnaLoadingSpinner();
+        } else {
+          if(snapshot.data == true) {
+            // TODO "Please grant permissions"
+            return const MovnaLoadingSpinner();
+          } else {
+            // Permissions are granted ! Start the app.
+            return BlocProvider(
+            create: (context) => injector<HomeBloc>(),
+            child: const _HomeView(),
+          );
+          }
+        }
+    }},
     );
   }
 }
