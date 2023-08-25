@@ -2,7 +2,7 @@
 
 Movnå is an open-source training application.
 
-**IMPORTANT** This project has moved (there)[https://github.com/MovnaTeam/movna].
+**IMPORTANT** This project has moved [there](https://github.com/MovnaTeam/movna).
 This current repository can be considered abandoned.
 
 ## Build from source
